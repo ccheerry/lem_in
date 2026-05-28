@@ -1,0 +1,109 @@
+#ifndef LEM_IN_H
+# define LEM_IN_H
+
+# include "../lib/libft.h"
+# include <stdlib.h>
+# include <unistd.h>
+
+# define HASH_SIZE 1024
+
+/*
+** A node in the ant farm graph.
+** id is the numeric index used for matrix access.
+*/
+typedef struct s_room
+{
+	char			*name;
+	int				x;
+	int				y;
+	int				id;
+}	t_room;
+
+/*
+** Hash table for room lookup by name during parsing.
+*/
+typedef struct s_hash_entry
+{
+	char				*key;
+	t_room				*room;
+	struct s_hash_entry	*next;
+}	t_hash_entry;
+
+typedef struct s_hash_table
+{
+	t_hash_entry	**buckets;
+	int				size;
+}	t_hash_table;
+
+typedef struct s_path
+{
+	int				*rooms;
+	int				len;
+	int				ants_assigned;
+	struct s_path	*next;
+}	t_path;
+
+/*
+** Graph after node-splitting.
+** Each room becomes two nodes: in (id*2) and out (id*2+1).
+** capacity/flow matrices are num_nodes x num_nodes.
+** Start and end are not split (infinite capacity).
+*/
+typedef struct s_graph
+{
+	t_room			**rooms;
+	int				num_rooms;
+	int				start_id;
+	int				end_id;
+	int				**capacity;
+	int				**flow;
+	int				num_nodes;
+}	t_graph;
+
+typedef struct s_input
+{
+	char			**lines;
+	int				count;
+	int				capacity;
+}	t_input;
+
+typedef struct s_lem_in
+{
+	int				num_ants;
+	t_graph			graph;
+	t_hash_table	*hash;
+	t_path			*paths;
+	int				num_paths;
+	t_input			input;
+}	t_lem_in;
+
+/* parsing */
+char			*read_stdin(size_t *out_len);
+int				parse_input(t_lem_in *lem);
+int				parse_room(t_lem_in *lem, char *line, int type);
+int				parse_link(t_lem_in *lem, char *line);
+int				store_line(t_input *input, char *line);
+
+/* graph */
+void			graph_init(t_lem_in *lem);
+void			node_split(t_lem_in *lem);
+t_hash_table	*hash_new(int size);
+void			hash_insert(t_hash_table *ht, char *key, t_room *room);
+t_room			*hash_lookup(t_hash_table *ht, char *key);
+void			hash_free(t_hash_table *ht);
+
+/* solver */
+int				algo(t_lem_in *lem);
+t_path			*extract_paths(t_lem_in *lem);
+int				select_paths(t_lem_in *lem);
+int				calc_turns(t_path *paths, int num_paths, int num_ants);
+
+/* simulation */
+void			assign_ants(t_lem_in *lem);
+void			simulate(t_lem_in *lem);
+
+/* utils */
+void			error_exit(t_lem_in *lem);
+void			free_all(t_lem_in *lem);
+
+#endif
