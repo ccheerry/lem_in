@@ -6,6 +6,8 @@
 # include <unistd.h>
 
 # define HASH_SIZE 1024
+# define START_ROOM 1
+# define END_ROOM 2
 
 /*
 ** A node in the ant farm graph.

@@ -41,12 +41,12 @@ static int	dispatch_line(t_lem_in *lem, char *line, int *type)
 	printf("%s\n", line); // rm dbg
 	if (ft_strcmp(line, "##start") == 0)
 	{
-		*type = 1;
+		*type = START_ROOM;
 		return (store_line(&lem->input, line));
 	}
 	if (ft_strcmp(line, "##end") == 0)
 	{
-		*type = 2;
+		*type = END_ROOM;
 		return (store_line(&lem->input, line));
 	}
 	if (line[0] == '#')
