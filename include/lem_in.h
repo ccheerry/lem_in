@@ -55,6 +55,7 @@ typedef struct s_graph
 {
 	t_room			**rooms;
 	int				num_rooms;
+	int				rooms_cap;
 	int				start_id;
 	int				end_id;
 	int				**capacity;
