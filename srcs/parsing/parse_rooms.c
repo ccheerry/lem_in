@@ -58,6 +58,7 @@ int	parse_room(t_lem_in *lem, char *line, int type)
 	if (!push_room(&lem->graph, room))
 		return (free(room->name), free(room), 0);
 	lem->graph.num_rooms++;
+	hash_insert(lem->hash, room->name, room);
 	if (type == START_ROOM)
 		lem->graph.start_id = room->id;
 	else if (type == END_ROOM)

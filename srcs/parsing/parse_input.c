@@ -74,6 +74,9 @@ int	parse_input(t_lem_in *lem)
 	line = next_line(data, len, &pos);
 	if (!parse_ants(lem, line) || !store_line(&lem->input, line))
 		return (free(data), 0);
+	lem->hash = hash_new(HASH_SIZE);
+	if (!lem->hash)
+		return (free(data), 0);
 	type = 0;
 	line = next_line(data, len, &pos);
 	while (line)
