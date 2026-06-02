@@ -22,6 +22,12 @@ typedef struct s_room
 	int				id;
 }	t_room;
 
+typedef struct s_link
+{
+	int	from;
+	int	to;
+}	t_link;
+
 /*
 ** Hash table for room lookup by name during parsing.
 */
@@ -55,8 +61,11 @@ typedef struct s_path
 typedef struct s_graph
 {
 	t_room			**rooms;
+	t_link			*links;
 	int				num_rooms;
 	int				rooms_cap;
+	int				num_links;
+	int				links_cap;
 	int				start_id;
 	int				end_id;
 	int				**capacity;
