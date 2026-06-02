@@ -1,19 +1,5 @@
 #include "lem_in.h"
 
-#define ROOMS_INIT_CAP 64
-
-static void	free_split(char **arr)
-{
-	int	i;
-
-	i = 0;
-	if (!arr)
-		return ;
-	while (arr[i])
-		free(arr[i++]);
-	free(arr);
-}
-
 static int	push_room(t_graph *graph, t_room *room)
 {
 	t_room	**bigger;

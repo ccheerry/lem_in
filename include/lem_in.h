@@ -6,6 +6,7 @@
 # include <unistd.h>
 
 # define HASH_SIZE 1024
+# define ROOMS_INIT_CAP 64
 # define START_ROOM 1
 # define END_ROOM 2
 
@@ -107,6 +108,7 @@ void			simulate(t_lem_in *lem);
 
 /* utils */
 void			error_exit(t_lem_in *lem);
+void			free_split(char **arr);
 void			free_all(t_lem_in *lem);
 
 #endif
