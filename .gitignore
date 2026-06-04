@@ -1,5 +1,6 @@
 lem-in
-obj/
+objects/
 lib/libft.a
-lib/obj/
+lib/.bonus
 .vscode/
+docs/

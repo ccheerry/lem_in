@@ -1,7 +1,5 @@
 #include "lem_in.h"
 
-#define INIT_CAP 64
-
 int	store_line(t_input *input, char *line)
 {
 	char	**new_lines;
@@ -19,8 +17,7 @@ int	store_line(t_input *input, char *line)
 			return (0);
 		if (input->lines)
 		{
-			ft_memcpy(new_lines, input->lines,
-				sizeof(char *) * input->count);
+			ft_memcpy(new_lines, input->lines, sizeof(char *) * input->count);
 			free(input->lines);
 		}
 		input->lines = new_lines;

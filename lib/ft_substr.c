@@ -3,14 +3,12 @@
 /*                                                        :::      ::::::::   */
 /*   ft_substr.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: acerezo- <acerezo-@student.42.fr>          +#+  +:+       +#+        */
+/*   By: acerezo- <acerezo-@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/19 13:23:07 by acerezo-          #+#    #+#             */
 /*   Updated: 2024/10/07 13:34:59 by acerezo-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
-#include "libft.h"
 
 #include "libft.h"
 
@@ -35,14 +33,3 @@ char	*ft_substr(char const *s, unsigned int start, size_t len)
 	ft_strlcpy(substr, s + start, sub_len + 1);
 	return (substr);
 }
-
-// #include <stdio.h>
-
-// int	main(void)
-// {
-// 	char	*str = "hola amigo!";
-// 	char	*substr = ft_substr(str, 2, 8);
-// 	printf("%s\n", substr);
-// 	free(substr);
-// 	return (0);
-// }

@@ -16,8 +16,7 @@ static int	push_room(t_graph *graph, t_room *room)
 			return (0);
 		if (graph->rooms)
 		{
-			ft_memcpy(bigger, graph->rooms,
-				sizeof(t_room *) * graph->num_rooms);
+			ft_memcpy(bigger, graph->rooms, sizeof(t_room *) * graph->num_rooms);
 			free(graph->rooms);
 		}
 		graph->rooms = bigger;
@@ -63,7 +62,5 @@ int	parse_room(t_lem_in *lem, char *line, int type)
 		lem->graph.start_id = room->id;
 	else if (type == END_ROOM)
 		lem->graph.end_id = room->id;
-	printf("[room] id=%d name=%s x=%d y=%d type=%d\n",
-		room->id, room->name, room->x, room->y, type);
 	return (1);
 }

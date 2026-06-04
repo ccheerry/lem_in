@@ -1,10 +1,15 @@
 #include "lem_in.h"
 
-int	main(void)
+int	main(int argc, char *argv[])
 {
 	t_lem_in	lem;
+	(void)argv;
 
+	if (argc != 1)
+		return (write(STDERR_FILENO, ARGS_ERR, 53), 1);
 	ft_memset(&lem, 0, sizeof(t_lem_in));
+	lem.graph.start_id = -1; // fix
+	lem.graph.end_id = -1; // fix
 	if (!parse_input(&lem))
 		error_exit(&lem);
 	graph_init(&lem);

@@ -38,7 +38,6 @@ static int	parse_ants(t_lem_in *lem, char *line)
 
 static int	dispatch_line(t_lem_in *lem, char *line, int *type)
 {
-	printf("%s\n", line); // rm dbg
 	if (ft_strcmp(line, "##start") == 0)
 	{
 		*type = START_ROOM;

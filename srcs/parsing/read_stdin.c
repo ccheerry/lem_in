@@ -1,7 +1,5 @@
 #include "lem_in.h"
 
-#define READ_BUF 4096
-
 static char	*grow_buf(char *buf, size_t *cap)
 {
 	char	*new_buf;

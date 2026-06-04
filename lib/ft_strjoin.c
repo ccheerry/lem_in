@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   ft_strjoin.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: acerezo- <acerezo-@student.42.fr>          +#+  +:+       +#+        */
+/*   By: acerezo- <acerezo-@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/19 13:30:31 by acerezo-          #+#    #+#             */
 /*   Updated: 2024/09/23 11:58:34 by acerezo-         ###   ########.fr       */
@@ -40,9 +40,3 @@ char	*ft_strjoin(char const *s1, char const *s2)
 	str[j] = '\0';
 	return (str);
 }
-
-// #include <stdio.h>
-// int	main(void)
-// {
-// 	printf("%s", ft_strjoin("Hello ", "World!!!"));
-// }

@@ -1,7 +1,5 @@
 #include "lem_in.h"
 
-#define LINKS_INIT_CAP 64
-
 static char	**split_link(char *line)
 {
 	char	**ends;
@@ -55,7 +53,6 @@ int	parse_link(t_lem_in *lem, char *line)
 		return (0);
 	a = hash_lookup(lem->hash, ends[0]);
 	b = hash_lookup(lem->hash, ends[1]);
-	printf("[link] from=%s to=%s\n", ends[0], ends[1]);
 	free_split(ends);
 	if (!a || !b || a == b)
 		return (0);

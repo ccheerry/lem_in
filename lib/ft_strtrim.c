@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   ft_strtrim.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: acerezo- <acerezo-@student.42.fr>          +#+  +:+       +#+        */
+/*   By: acerezo- <acerezo-@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/19 13:42:24 by acerezo-          #+#    #+#             */
 /*   Updated: 2024/10/07 18:30:53 by acerezo-         ###   ########.fr       */
@@ -49,10 +49,3 @@ char	*ft_strtrim(char const *s1, char const *set)
 	new[k] = '\0';
 	return (new);
 }
-
-// #include <stdio.h>
-
-// int	main(void)
-// {
-// 	printf("%s", ft_strtrim("HolaAmigoPaco", "abcdefghijklmnopqrstuvwzyz"));
-// }

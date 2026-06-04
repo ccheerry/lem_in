@@ -2,13 +2,16 @@
 # define LEM_IN_H
 
 # include "../lib/libft.h"
-# include <stdlib.h>
-# include <unistd.h>
 
 # define HASH_SIZE 1024
 # define ROOMS_INIT_CAP 64
 # define START_ROOM 1
 # define END_ROOM 2
+# define INIT_CAP 64
+# define READ_BUF 4096
+# define LINKS_INIT_CAP 64
+
+# define ARGS_ERR "Error!\nCompile the executable without any arguments.\n"
 
 /*
 ** A node in the ant farm graph.
