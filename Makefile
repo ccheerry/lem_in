@@ -24,7 +24,7 @@ SRCS		= srcs/main.c \
 			  srcs/graph/graph_init.c \
 			  srcs/graph/node_split.c \
 			  srcs/graph/hash_table.c \
-			  srcs/solver/algo.c \
+			  srcs/solver/algorithm.c \
 			  srcs/solver/paths.c \
 			  srcs/simulation/simulate.c \
 			  srcs/utils/error.c \
@@ -49,7 +49,7 @@ $(LIBFT): $(LIBFT_SRC)
 
 $(NAME): $(LIBFT) $(OBJS)
 	@$(CC) $(CFLAGS) $(OBJS) $(LIBFT) -o $(NAME)
-	@printf "$(CYAN)Compiled!$(RESET)\n"
+	@printf "$(CYAN)Ready!$(RESET)\n"
 
 $(OBJ_DIR)/%.o: %.c include/lem_in.h lib/libft.h
 	@mkdir -p $(dir $@)

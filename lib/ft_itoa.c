@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   ft_itoa.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: acerezo- <acerezo-@student.42madrid.com>   +#+  +:+       +#+        */
+/*   By: acerezo- <acerezo-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 12:17:42 by acerezo-          #+#    #+#             */
 /*   Updated: 2024/09/23 13:18:24 by acerezo-         ###   ########.fr       */

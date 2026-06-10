@@ -1,6 +1,19 @@
-lem-in
+# Compiled objects
 objects/
+*.o
+*.d
 lib/libft.a
 lib/.bonus
+
+# Binary
+lem-in
+
+# IDE / Editor
 .vscode/
-docs/
+.idea/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store

@@ -1,0 +1,11 @@
+3
+#this is a comment, must be ignored
+##start
+A0 1 6
+##unknown_command_must_be_ignored
+A1 8 6
+#comment between rooms
+##end
+A2 15 6
+A0-A1
+A1-A2

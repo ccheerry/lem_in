@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   ft_putstr_fd.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: acerezo- <acerezo-@student.42madrid.com>   +#+  +:+       +#+        */
+/*   By: acerezo- <acerezo-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 13:42:47 by acerezo-          #+#    #+#             */
 /*   Updated: 2024/09/23 13:45:01 by acerezo-         ###   ########.fr       */

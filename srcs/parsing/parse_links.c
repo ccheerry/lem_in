@@ -45,8 +45,8 @@ static int	push_link(t_graph *graph, int a, int b)
 int	parse_link(t_lem_in *lem, char *line)
 {
 	char	**ends;
-	t_room *a;
-	t_room *b;
+	t_room	*a;
+	t_room	*b;
 
 	ends = split_link(line);
 	if (!ends)

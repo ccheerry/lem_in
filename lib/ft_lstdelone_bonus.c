@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   ft_lstdelone_bonus.c                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: acerezo- <acerezo-@student.42madrid.com>   +#+  +:+       +#+        */
+/*   By: acerezo- <acerezo-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/26 12:08:28 by acerezo-          #+#    #+#             */
 /*   Updated: 2024/09/26 12:44:40 by acerezo-         ###   ########.fr       */

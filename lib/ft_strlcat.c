@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   ft_strlcat.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: acerezo- <acerezo-@student.42madrid.com>   +#+  +:+       +#+        */
+/*   By: acerezo- <acerezo-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/18 12:30:43 by acerezo-          #+#    #+#             */
 /*   Updated: 2024/09/18 15:11:13 by acerezo-         ###   ########.fr       */

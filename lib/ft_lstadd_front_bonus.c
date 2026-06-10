@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   ft_lstadd_front_bonus.c                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: acerezo- <acerezo-@student.42madrid.com>   +#+  +:+       +#+        */
+/*   By: acerezo- <acerezo-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/26 11:36:34 by acerezo-          #+#    #+#             */
 /*   Updated: 2024/09/26 13:33:15 by acerezo-         ###   ########.fr       */
