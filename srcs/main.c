@@ -1,4 +1,23 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ravazque <ravazque@student.42madrid.com    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/06/15 20:58:24 by ravazque          #+#    #+#             */
+/*   Updated: 2026/06/15 21:36:24 by ravazque         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "lem_in.h"
+
+void	error_exit(t_lem_in *lem)
+{
+	free_all(lem);
+	write(STDERR_FILENO, ERR, 6);
+	exit(1);
+}
 
 int	main(int argc, char *argv[])
 {

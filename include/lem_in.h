@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   lem_in.h                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ravazque <ravazque@student.42madrid.com    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/06/15 20:59:16 by ravazque          #+#    #+#             */
+/*   Updated: 2026/06/15 21:39:51 by ravazque         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef LEM_IN_H
 # define LEM_IN_H
 
@@ -11,7 +23,11 @@
 # define READ_BUF 4096
 # define LINKS_INIT_CAP 64
 
-# define ARGS_ERR "Error!\nCompile the executable without any arguments.\n"
+# define ARGS_ERR \
+	"Error!\nCompile the executable without any arguments.\n"
+
+# define ERR \
+	"ERROR\n"
 
 /*
 ** A node in the ant farm graph.
@@ -27,8 +43,8 @@ typedef struct s_room
 
 typedef struct s_link
 {
-	int	from;
-	int	to;
+	int		from;
+	int		to;
 }	t_link;
 
 /*
@@ -52,6 +68,7 @@ typedef struct s_path
 	int				*rooms;
 	int				len;
 	int				ants_assigned;
+	int				first_ant;
 	struct s_path	*next;
 }	t_path;
 
@@ -63,9 +80,21 @@ typedef struct s_edge
 {
 	int				to;
 	int				cap;
+	int				is_rev;
 	struct s_edge	*rev;
 	struct s_edge	*next;
 }	t_edge;
+
+/*
+** Scratch buffers reused across every BFS pass: parent edge that reached each
+** node, the FIFO queue, and the visited marker.
+*/
+typedef struct s_bfs
+{
+	t_edge	**parent;
+	int		*queue;
+	char	*visited;
+}	t_bfs;
 
 /*
 ** Node-split graph as adjacency lists (O(V + E) memory). Each room becomes two
@@ -92,6 +121,17 @@ typedef struct s_input
 	int				capacity;
 }	t_input;
 
+/*
+** Growable output buffer: everything is appended here and flushed with a
+** single write() at the end, so large maps avoid thousands of tiny writes.
+*/
+typedef struct s_buf
+{
+	char			*data;
+	size_t			len;
+	size_t			cap;
+}	t_buf;
+
 typedef struct s_lem_in
 {
 	int				num_ants;
@@ -114,6 +154,7 @@ int				store_line(t_input *input, char *line);
 
 void			graph_init(t_lem_in *lem);
 void			node_split(t_lem_in *lem);
+int				add_edge(t_graph *graph, int from, int to, int cap);
 t_hash_table	*hash_new(int size);
 void			hash_insert(t_hash_table *ht, char *key, t_room *room);
 t_room			*hash_lookup(t_hash_table *ht, char *key);
@@ -125,11 +166,14 @@ int				algorithm(t_lem_in *lem);
 t_path			*extract_paths(t_lem_in *lem);
 int				select_paths(t_lem_in *lem);
 int				calc_turns(t_path *paths, int num_paths, int num_ants);
+void			assign_counts(t_lem_in *lem, t_path **arr, int k);
 
 // =[ simulation ]========================================================== //
 
 void			assign_ants(t_lem_in *lem);
 void			simulate(t_lem_in *lem);
+int				buf_append(t_buf *b, const char *s, size_t n);
+int				buf_putnbr(t_buf *b, int n);
 
 // =[ utils ]=============================================================== //
 

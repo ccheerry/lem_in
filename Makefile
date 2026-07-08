@@ -26,8 +26,10 @@ SRCS		= srcs/main.c \
 			  srcs/graph/hash_table.c \
 			  srcs/solver/algorithm.c \
 			  srcs/solver/paths.c \
+			  srcs/solver/select.c \
+			  srcs/solver/turns.c \
 			  srcs/simulation/simulate.c \
-			  srcs/utils/error.c \
+			  srcs/simulation/output.c \
 			  srcs/utils/memory.c
 
 OBJS		= $(SRCS:%.c=$(OBJ_DIR)/%.o)

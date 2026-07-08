@@ -1,20 +1,29 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   read_stdin.c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ravazque <ravazque@student.42madrid.com    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/06/15 20:58:53 by ravazque          #+#    #+#             */
+/*   Updated: 2026/06/15 20:59:33 by ravazque         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "lem_in.h"
 
-static char	*grow_buf(char *buf, size_t *cap)
+static char	*grow_buf(char *buf, size_t *cap, size_t len)
 {
 	char	*new_buf;
-	size_t	new_cap;
 
-	new_cap = *cap * 2;
-	new_buf = malloc(new_cap);
+	if (len + READ_BUF <= *cap)
+		return (buf);
+	new_buf = malloc(*cap * 2);
 	if (!new_buf)
-	{
-		free(buf);
-		return (NULL);
-	}
+		return (free(buf), NULL);
 	ft_memcpy(new_buf, buf, *cap);
 	free(buf);
-	*cap = new_cap;
+	*cap *= 2;
 	return (new_buf);
 }
 
@@ -34,12 +43,9 @@ char	*read_stdin(size_t *out_len)
 	while (ret > 0)
 	{
 		len += ret;
-		if (len + READ_BUF > cap)
-		{
-			buf = grow_buf(buf, &cap);
-			if (!buf)
-				return (NULL);
-		}
+		buf = grow_buf(buf, &cap, len);
+		if (!buf)
+			return (NULL);
 		ret = read(0, buf + len, READ_BUF);
 	}
 	if (ret < 0)

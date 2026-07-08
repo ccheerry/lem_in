@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   store_line.c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ravazque <ravazque@student.42madrid.com    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/06/15 20:58:51 by ravazque          #+#    #+#             */
+/*   Updated: 2026/06/15 20:59:33 by ravazque         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "lem_in.h"
 
 int	store_line(t_input *input, char *line)
@@ -26,6 +38,5 @@ int	store_line(t_input *input, char *line)
 	dup = ft_strdup(line);
 	if (!dup)
 		return (0);
-	input->lines[input->count++] = dup;
-	return (1);
+	return (input->lines[input->count++] = dup, 1);
 }
