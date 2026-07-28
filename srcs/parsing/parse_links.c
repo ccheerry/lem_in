@@ -1,6 +1,16 @@
-#include "lem_in.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   parse_links.c                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ravazque <ravazque@student.42madrid.com    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/06/15 20:58:57 by ravazque          #+#    #+#             */
+/*   Updated: 2026/06/15 20:59:33 by ravazque         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-#define LINKS_INIT_CAP 64
+#include "lem_in.h"
 
 static char	**split_link(char *line)
 {
@@ -47,15 +57,14 @@ static int	push_link(t_graph *graph, int a, int b)
 int	parse_link(t_lem_in *lem, char *line)
 {
 	char	**ends;
-	t_room *a;
-	t_room *b;
+	t_room	*a;
+	t_room	*b;
 
 	ends = split_link(line);
 	if (!ends)
 		return (0);
 	a = hash_lookup(lem->hash, ends[0]);
 	b = hash_lookup(lem->hash, ends[1]);
-	printf("[link] from=%s to=%s\n", ends[0], ends[1]);
 	free_split(ends);
 	if (!a || !b || a == b)
 		return (0);

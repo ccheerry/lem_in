@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   hash_table.c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ravazque <ravazque@student.42madrid.com    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/06/15 20:59:07 by ravazque          #+#    #+#             */
+/*   Updated: 2026/06/15 20:59:33 by ravazque         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "lem_in.h"
 
 static unsigned long	hash_key(const char *key)
@@ -66,5 +78,24 @@ t_room	*hash_lookup(t_hash_table *ht, char *key)
 
 void	hash_free(t_hash_table *ht)
 {
-	(void)ht;
+	t_hash_entry	*entry;
+	t_hash_entry	*next;
+	int				i;
+
+	if (!ht)
+		return ;
+	i = 0;
+	while (i < ht->size)
+	{
+		entry = ht->buckets[i];
+		while (entry)
+		{
+			next = entry->next;
+			free(entry);
+			entry = next;
+		}
+		i++;
+	}
+	free(ht->buckets);
+	free(ht);
 }

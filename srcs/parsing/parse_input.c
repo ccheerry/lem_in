@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   parse_input.c                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ravazque <ravazque@student.42madrid.com    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/06/15 20:59:00 by ravazque          #+#    #+#             */
+/*   Updated: 2026/06/15 20:59:33 by ravazque         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "lem_in.h"
 
 static char	*next_line(char *data, size_t len, size_t *pos)
@@ -38,7 +50,6 @@ static int	parse_ants(t_lem_in *lem, char *line)
 
 static int	dispatch_line(t_lem_in *lem, char *line, int *type)
 {
-	printf("%s\n", line); // rm dbg
 	if (ft_strcmp(line, "##start") == 0)
 	{
 		*type = START_ROOM;
@@ -85,6 +96,5 @@ int	parse_input(t_lem_in *lem)
 			return (free(data), 0);
 		line = next_line(data, len, &pos);
 	}
-	free(data);
-	return (lem->graph.start_id >= 0 && lem->graph.end_id >= 0);
+	return (free(data), lem->graph.start_id >= 0 && lem->graph.end_id >= 0);
 }

@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   ft_putnbr_fd.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: acerezo- <acerezo-@student.42.fr>          +#+  +:+       +#+        */
+/*   By: acerezo- <acerezo-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 13:49:59 by acerezo-          #+#    #+#             */
 /*   Updated: 2024/09/23 13:55:57 by acerezo-         ###   ########.fr       */
@@ -34,10 +34,3 @@ void	ft_putnbr_fd(int n, int fd)
 	else
 		ft_putchar_fd(n + 48, fd);
 }
-
-// #include <fcntl.h>
-// int main()
-// {
-// 	int fd = open("test", O_RDWR | O_CREAT);
-// 	ft_putnbr_fd(7821, fd);
-// }

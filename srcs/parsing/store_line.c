@@ -1,6 +1,16 @@
-#include "lem_in.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   store_line.c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ravazque <ravazque@student.42madrid.com    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/06/15 20:58:51 by ravazque          #+#    #+#             */
+/*   Updated: 2026/06/15 20:59:33 by ravazque         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-#define INIT_CAP 64
+#include "lem_in.h"
 
 int	store_line(t_input *input, char *line)
 {
@@ -19,8 +29,7 @@ int	store_line(t_input *input, char *line)
 			return (0);
 		if (input->lines)
 		{
-			ft_memcpy(new_lines, input->lines,
-				sizeof(char *) * input->count);
+			ft_memcpy(new_lines, input->lines, sizeof(char *) * input->count);
 			free(input->lines);
 		}
 		input->lines = new_lines;
@@ -29,6 +38,5 @@ int	store_line(t_input *input, char *line)
 	dup = ft_strdup(line);
 	if (!dup)
 		return (0);
-	input->lines[input->count++] = dup;
-	return (1);
+	return (input->lines[input->count++] = dup, 1);
 }

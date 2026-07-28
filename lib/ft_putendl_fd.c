@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   ft_putendl_fd.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: acerezo- <acerezo-@student.42.fr>          +#+  +:+       +#+        */
+/*   By: acerezo- <acerezo-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/23 13:45:39 by acerezo-          #+#    #+#             */
 /*   Updated: 2024/09/23 13:48:46 by acerezo-         ###   ########.fr       */
@@ -26,10 +26,3 @@ void	ft_putendl_fd(char *s, int fd)
 	}
 	write(fd, &endln, 1);
 }
-
-// #include <fcntl.h>
-// int main()
-// {
-// 	int fd = open("test", O_RDWR | O_CREAT);
-// 	ft_putendl_fd("keloke", fd);
-// }

@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   parse_rooms.c                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ravazque <ravazque@student.42madrid.com    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/06/15 20:58:55 by ravazque          #+#    #+#             */
+/*   Updated: 2026/06/15 21:30:13 by ravazque         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "lem_in.h"
 
 static int	push_room(t_graph *graph, t_room *room)
@@ -16,8 +28,7 @@ static int	push_room(t_graph *graph, t_room *room)
 			return (0);
 		if (graph->rooms)
 		{
-			ft_memcpy(bigger, graph->rooms,
-				sizeof(t_room *) * graph->num_rooms);
+			ft_memcpy(bigger, graph->rooms, sizeof(t_room *) * graph->num_rooms);
 			free(graph->rooms);
 		}
 		graph->rooms = bigger;
@@ -27,13 +38,42 @@ static int	push_room(t_graph *graph, t_room *room)
 	return (1);
 }
 
+static int	valid_coord(char *s)
+{
+	int	i;
+
+	i = 0;
+	if (s[0] == '-' || s[0] == '+')
+		i++;
+	if (!s[i])
+		return (0);
+	while (s[i])
+	{
+		if (s[i] < '0' || s[i] > '9')
+			return (0);
+		i++;
+	}
+	return (1);
+}
+
+static int	valid_fields(char **elems)
+{
+	if (!elems || !elems[0] || !elems[1] || !elems[2] || elems[3])
+		return (0);
+	if (elems[0][0] == 'L')
+		return (0);
+	if (!valid_coord(elems[1]) || !valid_coord(elems[2]))
+		return (0);
+	return (1);
+}
+
 static t_room	*new_room(char *line, int id)
 {
 	t_room	*room;
 	char	**elems;
 
 	elems = ft_split(line, ' ');
-	if (!elems || !elems[0] || !elems[1] || !elems[2])
+	if (!valid_fields(elems))
 		return (free_split(elems), NULL);
 	room = ft_calloc(1, sizeof(t_room));
 	if (!room)
@@ -55,6 +95,12 @@ int	parse_room(t_lem_in *lem, char *line, int type)
 	room = new_room(line, lem->graph.num_rooms);
 	if (!room)
 		return (0);
+	if (hash_lookup(lem->hash, room->name))
+		return (free(room->name), free(room), 0);
+	if (type == START_ROOM && lem->graph.start_id != -1)
+		return (free(room->name), free(room), 0);
+	if (type == END_ROOM && lem->graph.end_id != -1)
+		return (free(room->name), free(room), 0);
 	if (!push_room(&lem->graph, room))
 		return (free(room->name), free(room), 0);
 	lem->graph.num_rooms++;
@@ -63,7 +109,5 @@ int	parse_room(t_lem_in *lem, char *line, int type)
 		lem->graph.start_id = room->id;
 	else if (type == END_ROOM)
 		lem->graph.end_id = room->id;
-	printf("[room] id=%d name=%s x=%d y=%d type=%d\n",
-		room->id, room->name, room->x, room->y, type);
 	return (1);
 }
