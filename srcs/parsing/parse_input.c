@@ -16,7 +16,7 @@ static char	*next_line(char *data, size_t len, size_t *pos)
 {
 	size_t	start;
 
-	if (*pos >= len)
+	if (*pos >= len || (data[*pos] == '\n' && *pos + 1 == len))
 		return (NULL);
 	start = *pos;
 	while (*pos < len && data[*pos] != '\n')
