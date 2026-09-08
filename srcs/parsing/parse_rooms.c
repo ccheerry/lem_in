@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parse_rooms.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ravazque <ravazque@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: acerezo- <acerezo-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/15 20:58:55 by ravazque          #+#    #+#             */
-/*   Updated: 2026/06/15 21:30:13 by ravazque         ###   ########.fr       */
+/*   Updated: 2026/09/08 17:51:52 by acerezo-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,8 @@ static int	push_room(t_graph *graph, t_room *room)
 			return (0);
 		if (graph->rooms)
 		{
-			ft_memcpy(bigger, graph->rooms, sizeof(t_room *) * graph->num_rooms);
+			ft_memcpy(bigger,
+				graph->rooms, sizeof(t_room *) * graph->num_rooms);
 			free(graph->rooms);
 		}
 		graph->rooms = bigger;

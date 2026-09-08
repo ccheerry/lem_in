@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   graph_init.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ravazque <ravazque@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: acerezo- <acerezo-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/15 20:59:10 by ravazque          #+#    #+#             */
-/*   Updated: 2026/06/15 20:59:33 by ravazque         ###   ########.fr       */
+/*   Updated: 2026/09/08 17:51:20 by acerezo-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,8 @@ void	graph_init(t_lem_in *lem)
 	{
 		from = graph->links[i].from;
 		to = graph->links[i].to;
-		if (!add_edge(graph, from * 2 + 1, to * 2, 1) || !add_edge(graph, to * 2 + 1, from * 2, 1))
+		if (!add_edge(graph, from * 2 + 1, to * 2, 1)
+			|| !add_edge(graph, to * 2 + 1, from * 2, 1))
 			error_exit(lem);
 		i++;
 	}

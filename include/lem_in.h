@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   lem_in.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ravazque <ravazque@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: acerezo- <acerezo-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/15 20:59:16 by ravazque          #+#    #+#             */
-/*   Updated: 2026/06/15 21:39:51 by ravazque         ###   ########.fr       */
+/*   Updated: 2026/09/08 17:49:53 by acerezo-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,8 @@
 
 /*
 ** A node in the ant farm graph.
-** id is the numeric index; after node-splitting it maps to in = id*2, out = id*2+1.
+** id is the numeric index;
+** after node-splitting it maps to in = id*2, out = id*2+1.
 */
 typedef struct s_room
 {
