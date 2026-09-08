@@ -6,7 +6,7 @@
 /*   By: acerezo- <acerezo-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/15 20:58:55 by ravazque          #+#    #+#             */
-/*   Updated: 2026/09/08 17:51:52 by acerezo-         ###   ########.fr       */
+/*   Updated: 2026/09/08 19:00:06 by acerezo-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,7 +84,7 @@ static t_room	*new_room(char *line, int id)
 	room->x = ft_atoi(elems[1]);
 	room->y = ft_atoi(elems[2]);
 	free_split(elems);
-	if (!room->name)
+	if (!room->name || room->x < 0 || room->y < 0)
 		return (free(room), NULL);
 	return (room);
 }
