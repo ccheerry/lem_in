@@ -45,7 +45,7 @@ static void	free_adj(t_graph *g)
 	free(g->adj);
 }
 
-static void	free_paths(t_path *p)
+void	free_paths(t_path *p)
 {
 	t_path	*next;
 

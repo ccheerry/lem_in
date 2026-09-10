@@ -27,11 +27,7 @@ static t_edge	*new_edge(int to, int cap, int is_rev)
 	return (edge);
 }
 
-/*
-** Adds a directed edge from->to with the given capacity plus its residual
-** reverse edge (to->from, capacity 0). The two are linked through ->rev so
-** max-flow can push and cancel flow.
-*/
+/* Adds from->to with its residual reverse edge (to->from, capacity 0). */
 int	add_edge(t_graph *graph, int from, int to, int cap)
 {
 	t_edge	*fwd;
@@ -47,6 +43,7 @@ int	add_edge(t_graph *graph, int from, int to, int cap)
 	graph->adj[from] = fwd;
 	back->next = graph->adj[to];
 	graph->adj[to] = back;
+	graph->num_edges += 2;
 	return (1);
 }
 

@@ -11,20 +11,20 @@ The interesting part is not walking the graph, it is that a room can hold only
 one ant at a time (except `##start` and `##end`), so the ants have to be spread
 over **several routes that share no room**. The program therefore does not look
 for one shortest path: it turns the colony into a flow network, splits every
-room in two to enforce the one-ant rule, runs a **max-flow** pass to obtain the
-largest family of room-disjoint routes, then decides how many of those routes
-are worth using and how many ants each one carries.
+room in two to enforce the one-ant rule, runs a **min-cost max-flow** pass to
+obtain the shortest family of room-disjoint routes, then decides how many of
+those routes are worth using and how many ants each one carries.
 
 Everything is built with the standard C toolchain and a local `libft`; there
 are no external dependencies. Input is read from stdin in one pass, and the
-whole simulation is written to stdout with a single `write` at the end.
+simulation is streamed to stdout through a fixed-size buffer.
 
 ## 🎯 Objectives
 
 - Parsing an untrusted text format and rejecting every malformed colony
 - Modelling rooms and tunnels as a graph with adjacency lists
 - Enforcing a per-room capacity with **node splitting** (`in` / `out` pair)
-- Implementing **Edmonds-Karp** max flow on the resulting residual graph
+- Implementing **min-cost max flow** on the resulting residual graph
 - Decomposing the flow into concrete room-disjoint routes
 - Choosing the route count that minimises the number of turns
 - Distributing the ants so the last one arrives as early as possible
@@ -49,13 +49,13 @@ whole simulation is written to stdout with a single `write` at the end.
 | **graph** | Hash table | djb2 with chaining, 1024 buckets: room lookup by name in O(1) |
 | **graph** | Adjacency lists | Each tunnel becomes two directed edges plus their residual reverses |
 | **graph** | Node splitting | Room `i` becomes `in = 2i` and `out = 2i+1`, joined by an edge of capacity 1 |
-| **solver** | Max flow | Edmonds-Karp from `out(start)` to `in(end)`; the flow is the number of routes |
+| **solver** | Min-cost max flow | Dijkstra with Johnson potentials from `out(start)` to `in(end)`; the flow is the number of routes |
 | **solver** | Decomposition | Saturated forward edges are walked back into explicit room sequences |
-| **solver** | Route selection | Tries every count from 1 to the max flow, keeps the one with fewest turns |
+| **solver** | Route selection | Tries every count from 1 to the max flow, keeps the one with fewest turns; hopeless counts are skipped |
 | **solver** | Turn count | Binary search on the smallest turn `t` whose capacity covers every ant |
 | **solver** | Ant distribution | Each ant joins the route on which it would arrive earliest |
 | **simulation** | Turn emission | One line per turn, `Lx-room` tokens for every ant that moves |
-| **simulation** | Output buffer | Everything is appended to a growable buffer and flushed in one `write` |
+| **simulation** | Output buffer | Fixed 64 KB buffer flushed whenever it fills, so memory stays flat |
 | **utils** | Cleanup | A single `free_all` releases input, graph, edges, hash table and routes |
 
 <br>
@@ -254,13 +254,13 @@ lem-in/
     │   ├── node_split.c            # room → in/out pair with capacity 1
     │   └── hash_table.c            # room lookup by name (djb2, chaining)
     ├── solver/
-    │   ├── algorithm.c             # Edmonds-Karp max flow
+    │   ├── algorithm.c             # min-cost max flow
     │   ├── paths.c                 # flow decomposition into room sequences
     │   ├── select.c                # how many routes to keep
     │   └── turns.c                 # turn count and ant distribution
     ├── simulation/
     │   ├── simulate.c              # one line per turn
-    │   └── output.c                # growable output buffer
+    │   └── output.c                # fixed-size flushing output buffer
     └── utils/
         └── memory.c                # free helpers
 ```
@@ -297,18 +297,19 @@ of capacity 1. A tunnel `a-b` becomes `out(a) → in(b)` and `out(b) → in(a)`,
 both capacity 1. Sending flow from `out(start)` to `in(end)` therefore cannot
 reuse a room: its internal edge is already saturated.
 
-### Max flow — how many routes exist
+### Min-cost max flow — how many routes exist
 
 ```
-[ out(start) ] ──BFS──> … ──BFS──> [ in(end) ]
+[ out(start) ] ──cheapest path──> … ──> [ in(end) ]
       each augmenting path = one more room-disjoint route
       flow value == number of routes    (0 => ERROR, start and end disconnected)
 ```
 
-Edmonds-Karp repeats a BFS over the residual graph and pushes one unit of flow
-along each shortest augmenting path it finds. Because every capacity is 1, the
-final flow value is exactly the number of room-disjoint routes, and augmenting
-along shortest paths keeps those routes short.
+Forward edges cost `+1` and their residual reverses `-1`, so rerouting refunds
+the length it gives back. Each pass pushes one unit along the cheapest
+augmenting path, which keeps the routes as short as possible for that flow
+value. Dijkstra with Johnson potentials makes the negative reverse costs
+non-negative, and a bucket queue settles each node in `O(1)`.
 
 ### Route selection — fewest turns, not most routes
 
@@ -332,9 +333,9 @@ turn t, route of length len, ant j (0-based on that route):
      printed while 0 <= t - j <= len
 ```
 
-Ants are handed out one by one to the route on which they would arrive first
-(`len` plus the ants already queued there), each route gets a contiguous block
-of ids, and every turn is appended to one buffer flushed with a single `write`.
+Every route is filled up to the turn limit and the surplus dropped from the
+longest ones, each route gets a contiguous block of ids, and every turn goes
+through a 64 KB buffer flushed whenever it fills.
 
 <br>
 
@@ -344,7 +345,8 @@ of ids, and every turn is appended to one buffer flushed with a single `write`.
 
 - **Graph modelling**: turning a text description into adjacency lists, and
   turning a vertex constraint into an edge constraint through node splitting
-- **Network flow**: residual graphs, reverse edges, Edmonds-Karp, and the fact
+- **Network flow**: residual graphs, reverse edges, min-cost augmenting paths,
+  Johnson potentials, and the fact
   that unit capacities make the max flow equal a disjoint-route count
 - **Flow decomposition**: reading concrete routes back out of a flow, by
   following the forward edges that ended up saturated
@@ -365,7 +367,7 @@ of ids, and every turn is appended to one buffer flushed with a single `write`.
 - **Graph**: adjacency lists, `2 * rooms` nodes and `2 * (rooms + 2 * tunnels)`
   directed edges counting the residual reverses
 - **Lookup**: djb2 hash table, 1024 buckets, separate chaining
-- **Max flow**: Edmonds-Karp, `O(F * (V + E))` here, since every capacity is 1
+- **Min-cost max flow**: `O(F * (V + E))` here, since every capacity is 1
   and `F` is bounded by the degree of `##start` and `##end`
 - **Turn count**: binary search between the shortest route length and that
   length plus the ant count

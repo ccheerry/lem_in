@@ -22,6 +22,8 @@
 # define INIT_CAP 64
 # define READ_BUF 4096
 # define LINKS_INIT_CAP 64
+# define OUT_BUF 65536
+# define INF 2147483647
 
 # define ARGS_ERR \
 	"Error!\nCompile the executable without any arguments.\n"
@@ -29,11 +31,6 @@
 # define ERR \
 	"ERROR\n"
 
-/*
-** A node in the ant farm graph.
-** id is the numeric index;
-** after node-splitting it maps to in = id*2, out = id*2+1.
-*/
 typedef struct s_room
 {
 	char			*name;
@@ -48,9 +45,6 @@ typedef struct s_link
 	int		to;
 }	t_link;
 
-/*
-** Hash table for room lookup by name during parsing.
-*/
 typedef struct s_hash_entry
 {
 	char				*key;
@@ -73,10 +67,7 @@ typedef struct s_path
 	struct s_path	*next;
 }	t_path;
 
-/*
-** A directed edge in the residual graph. Internal edges come in pairs:
-** a forward edge with the capacity and a reverse edge starting at 0.
-*/
+/* Residual edge; forward and reverse are linked through ->rev. */
 typedef struct s_edge
 {
 	int				to;
@@ -86,21 +77,33 @@ typedef struct s_edge
 	struct s_edge	*next;
 }	t_edge;
 
-/*
-** Scratch buffers reused across every BFS pass: parent edge that reached each
-** node, the FIFO queue, and the visited marker.
-*/
-typedef struct s_bfs
+/* Scratch state reused by every Dijkstra pass over the residual graph. */
+typedef struct s_flow
 {
 	t_edge	**parent;
-	int		*queue;
-	char	*visited;
-}	t_bfs;
+	int		*dist;
+	int		*pot;
+	int		*bhead;
+	int		*enode;
+	int		*enext;
+	char	*done;
+	int		ecnt;
+	int		nbuck;
+	int		src;
+	int		sink;
+}	t_flow;
 
-/*
-** Node-split graph as adjacency lists (O(V + E) memory). Each room becomes two
-** nodes, in (id*2) and out (id*2+1), so num_nodes = num_rooms*2.
-*/
+/* One flow decomposition: route nodes, rooms already taken, endpoints. */
+typedef struct s_decomp
+{
+	int		*nodes;
+	char	*used;
+	t_edge	*cur;
+	int		src;
+	int		sink;
+}	t_decomp;
+
+/* Node-split graph: room id becomes in (id*2) and out (id*2+1). */
 typedef struct s_graph
 {
 	t_room			**rooms;
@@ -113,6 +116,7 @@ typedef struct s_graph
 	int				end_id;
 	t_edge			**adj;
 	int				num_nodes;
+	int				num_edges;
 }	t_graph;
 
 typedef struct s_input
@@ -122,10 +126,7 @@ typedef struct s_input
 	int				capacity;
 }	t_input;
 
-/*
-** Growable output buffer: everything is appended here and flushed with a
-** single write() at the end, so large maps avoid thousands of tiny writes.
-*/
+/* Output buffer flushed to stdout every OUT_BUF bytes. */
 typedef struct s_buf
 {
 	char			*data;
@@ -164,9 +165,13 @@ void			hash_free(t_hash_table *ht);
 // =[ solver ]============================================================== //
 
 int				algorithm(t_lem_in *lem);
+int				alloc_flow(t_graph *g, t_flow *f);
+void			free_flow(t_flow *f);
+int				shortest_path(t_graph *g, t_flow *f);
 t_path			*extract_paths(t_lem_in *lem);
+t_path			*sort_paths(t_path *head);
 int				select_paths(t_lem_in *lem);
-int				calc_turns(t_path *paths, int num_paths, int num_ants);
+long			calc_turns(t_path *paths, int num_paths, int num_ants);
 void			assign_counts(t_lem_in *lem, t_path **arr, int k);
 
 // =[ simulation ]========================================================== //
@@ -174,6 +179,7 @@ void			assign_counts(t_lem_in *lem, t_path **arr, int k);
 void			assign_ants(t_lem_in *lem);
 void			simulate(t_lem_in *lem);
 int				buf_append(t_buf *b, const char *s, size_t n);
+int				buf_flush(t_buf *b);
 int				buf_putnbr(t_buf *b, int n);
 
 // =[ utils ]=============================================================== //
@@ -181,6 +187,7 @@ int				buf_putnbr(t_buf *b, int n);
 void			error_exit(t_lem_in *lem);
 void			free_split(char **arr);
 void			free_all(t_lem_in *lem);
+void			free_paths(t_path *paths);
 
 // ========================================================================= //
 

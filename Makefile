@@ -3,7 +3,7 @@ MAKEFLAGS	+= --no-print-directory
 NAME		= lem-in
 
 CC			= cc
-CFLAGS		= -Wall -Wextra -Werror
+CFLAGS		= -Wall -Wextra -Werror -O0
 INCLUDES	= -I include -I lib
 
 LIBFT_DIR	= lib
@@ -25,6 +25,8 @@ SRCS		= srcs/main.c \
 			  srcs/graph/node_split.c \
 			  srcs/graph/hash_table.c \
 			  srcs/solver/algorithm.c \
+			  srcs/solver/shortest.c \
+			  srcs/solver/flow.c \
 			  srcs/solver/paths.c \
 			  srcs/solver/select.c \
 			  srcs/solver/turns.c \
@@ -47,7 +49,10 @@ LIBFT_SRC	= $(addprefix $(LIBFT_DIR)/, \
 all: $(NAME)
 
 $(LIBFT): $(LIBFT_SRC)
-	@$(MAKE) -C $(LIBFT_DIR) > /dev/null
+	@$(MAKE) -C $(LIBFT_DIR)
+
+# $(LIBFT): $(LIBFT_SRC)
+# 	@$(MAKE) -C $(LIBFT_DIR) > /dev/null
 
 $(NAME): $(LIBFT) $(OBJS)
 	@$(CC) $(CFLAGS) $(OBJS) $(LIBFT) -o $(NAME)
@@ -59,12 +64,21 @@ $(OBJ_DIR)/%.o: %.c include/lem_in.h lib/libft.h
 
 clean:
 	@printf "$(RED)Cleaning...$(RESET)\n"
-	@$(MAKE) -C $(LIBFT_DIR) clean > /dev/null 2>&1
+	@$(MAKE) -C $(LIBFT_DIR) clean
 	@rm -rf $(OBJ_DIR)
 
 fclean: clean
-	@$(MAKE) -C $(LIBFT_DIR) fclean > /dev/null 2>&1
+	@$(MAKE) -C $(LIBFT_DIR) fclean
 	@rm -f $(NAME)
+
+# clean:
+# 	@printf "$(RED)Cleaning...$(RESET)\n"
+# 	@$(MAKE) -C $(LIBFT_DIR) clean > /dev/null 2>&1
+# 	@rm -rf $(OBJ_DIR)
+
+# fclean: clean
+# 	@$(MAKE) -C $(LIBFT_DIR) fclean > /dev/null 2>&1
+# 	@rm -f $(NAME)
 
 re: fclean all
 

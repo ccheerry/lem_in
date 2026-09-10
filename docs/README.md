@@ -21,7 +21,7 @@ except the start and the end may hold more than one ant at a time.
     ├── main.c                              # parse → build → solve → simulate
     ├── parsing/     read, validate, store the colony
     ├── graph/       adjacency lists, node splitting, room lookup
-    ├── solver/      max flow, route extraction, route and ant selection
+    ├── solver/      min-cost max flow, route extraction, route and ant selection
     ├── simulation/  turn-by-turn output
     └── utils/       memory cleanup
 ```
@@ -41,7 +41,7 @@ out on stdout, and any error prints `ERROR` on stderr with exit status 1.
 | Route | A room sequence from start to end taken by a block of ants |
 | Node splitting | Room → `in`/`out` pair joined by a capacity-1 edge |
 | Residual graph | The directed graph max flow works on: forward and reverse edges |
-| Max flow | Number of routes that share no room, found by Edmonds-Karp |
+| Max flow | Number of routes that share no room, found by min-cost max flow |
 
 ## The problem
 
@@ -75,34 +75,39 @@ crossing a room saturates that room's internal edge, which is exactly the
 one-ant-per-room rule. Flow runs from `out(start)` to `in(end)`, so the internal
 edges of the start and end rooms are never on the path and never constrain them.
 
-**Max flow.** Edmonds-Karp: BFS the residual graph, push one unit along the
-shortest augmenting path found, repeat until the sink is unreachable. Each edge
-carries its residual reverse (capacity 0, linked through `->rev`), which is what
-lets a later augmentation undo an earlier bad choice. With unit capacities the
-final flow value is exactly the number of room-disjoint routes; a flow of 0
-means start and end are disconnected, which is an error.
+**Min-cost max flow.** Every forward edge costs `+1` and its residual reverse
+costs `-1`, so undoing an earlier choice refunds its length. Each pass pushes
+one unit along the *cheapest* augmenting path, which keeps the total length of
+the routes minimal for that flow value. The search is Dijkstra over the residual
+graph with Johnson potentials (`pot[v]` shifted by the previous distance) so the
+negative reverse costs become non-negative, and a bucket queue settles nodes in
+`O(1)`. With unit capacities the final flow value is exactly the number of
+room-disjoint routes; a flow of 0 means start and end are disconnected, which is
+an error.
 
 **Route extraction.** The flow is a set of saturated edges, not a list of
-routes, so it has to be decomposed. Starting from `out(start)`, the walk follows
-any forward edge whose capacity dropped to 0, restoring it as it goes so the
-next walk finds a different route, and stops at `in(end)`. Reverse edges are
-flagged so they are never mistaken for flow. Each walk yields one route, stored
-as room ids with the `in`/`out` duplicates collapsed.
+routes, so it has to be decomposed. One route is walked per saturated edge
+leaving `out(start)`, a cursor making sure no edge is taken twice; from there
+each node has a single outgoing unit of flow, so the walk just follows the
+saturated forward edges to `in(end)`. Rooms taken by an earlier route are marked
+so a cycle can never trap the walk. Each walk yields one route, stored as room
+ids with the `in`/`out` duplicates collapsed.
 
 **Route and ant selection.** Routes are sorted by length, shortest first. A
 route of length `len` delivers `t - len + 1` ants by turn `t`, so the turns
 needed by the `k` shortest routes are the smallest `t` whose total capacity
 reaches the ant count — found by binary search. Every `k` from 1 to the max flow
-is evaluated and the one with the fewest turns is kept; the rest are freed. The
-ants are then handed out one at a time, each joining the route on which it would
-arrive earliest (its length plus the ants already queued on it).
+is evaluated and the one with the fewest turns is kept; the rest are freed. A
+`k` that cannot beat the best turn count already found is never decomposed. The
+ants are then spread by filling every route up to that turn limit and dropping
+the surplus from the longest ones.
 
 **Simulation.** Each route receives a contiguous block of ant ids. Ant `j`
 (0-based within its route) leaves on turn `j+1` and on turn `t` stands in
 `rooms[t - j]`, so a turn is emitted by walking the routes and printing every
 ant currently between the start and the end. Everything — the echoed map, the
-blank line, all the turns — is appended to a growable buffer and sent out with a
-single `write`.
+blank line, all the turns — goes through a 64 KB buffer flushed whenever it
+fills, so memory stays flat however long the simulation runs.
 
 ## What gets rejected
 
@@ -129,11 +134,11 @@ With `R` rooms, `T` tunnels and `A` ants, the split graph has `V = 2R` nodes and
 |-------|------|
 | Parsing | `O(R + T)` amortised, hash lookups in `O(1)` |
 | Graph construction | `O(R + T)` |
-| Max flow | `O(F * (V + E))`, `F` bounded by the degree of start and end |
+| Min-cost max flow | `O(F * (V + E))`, `F` bounded by the degree of start and end |
 | Route extraction | `O(V + E)` |
 | Route selection | `O(F * F * log A)` — one binary search per candidate count |
-| Ant distribution | `O(A * F)` |
-| Simulation | `O(turns * A)` output tokens, one `write` |
+| Ant distribution | `O(F)` |
+| Simulation | `O(turns * A)` output tokens, flushed every 64 KB |
 
 ## Summary
 
@@ -141,19 +146,20 @@ With `R` rooms, `T` tunnels and `A` ants, the split graph has `V = 2R` nodes and
   for name lookup, and the input kept for the echo.
 - **Modelling** — every room split into `in`/`out` with a capacity-1 edge, which
   turns "one ant per room" into a plain edge capacity.
-- **Solving** — Edmonds-Karp max flow gives the room-disjoint routes; the flow
-  is then decomposed into explicit room sequences.
+- **Solving** — min-cost max flow gives the shortest room-disjoint routes; the
+  flow is then decomposed into explicit room sequences.
 - **Optimising** — the route count and the ant distribution are chosen to
   minimise the turn on which the last ant arrives.
 - **Output** — the map, a blank line, then one line of `Lx-room` tokens per
-  turn, flushed in a single write.
+  turn, flushed in fixed-size blocks.
 
 ## References
 
 Algorithms:
 
 - Maximum flow problem — <https://en.wikipedia.org/wiki/Maximum_flow_problem>
-- Edmonds-Karp algorithm — <https://en.wikipedia.org/wiki/Edmonds%E2%80%93Karp_algorithm>
+- Minimum-cost flow problem — <https://en.wikipedia.org/wiki/Minimum-cost_flow_problem>
+- Johnson's algorithm (potentials) — <https://en.wikipedia.org/wiki/Johnson%27s_algorithm>
 - Ford-Fulkerson method — <https://en.wikipedia.org/wiki/Ford%E2%80%93Fulkerson_algorithm>
 - Max-flow min-cut theorem — <https://en.wikipedia.org/wiki/Max-flow_min-cut_theorem>
 - Menger's theorem (disjoint paths and connectivity) —

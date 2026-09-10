@@ -5,19 +5,15 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: ravazque <ravazque@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/06/15 20:58:35 by ravazque          #+#    #+#             */
-/*   Updated: 2026/06/15 20:59:33 by ravazque         ###   ########.fr       */
+/*   Created: 2026/06/15 20:58:42 by ravazque          #+#    #+#             */
+/*   Updated: 2026/09/09 12:10:04 by ravazque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "lem_in.h"
 
-/*
-** Maximum number of ants the first num_paths paths can deliver by turn t.
-** A path of length len lets one ant in per turn, so it delivers t - len + 1
-** ants by turn t (when t >= len).
-*/
-static long	capacity(t_path *paths, int num_paths, int t)
+/* Ants the first num_paths routes can deliver by turn t. */
+static long	capacity(t_path *paths, int num_paths, long t)
 {
 	long	sum;
 	int		i;
@@ -27,29 +23,42 @@ static long	capacity(t_path *paths, int num_paths, int t)
 	while (i < num_paths && paths)
 	{
 		if (t >= paths->len)
-			sum += (long)(t - paths->len + 1);
+			sum += t - paths->len + 1;
 		paths = paths->next;
 		i++;
 	}
 	return (sum);
 }
 
-/*
-** Fewest turns to push num_ants ants through the num_paths shortest paths:
-** the smallest t whose capacity covers every ant. Binary searched between the
-** shortest path length and that length plus the ant count.
-*/
-int	calc_turns(t_path *paths, int num_paths, int num_ants)
+static long	min_len(t_path *paths, int num_paths)
 {
-	int	lo;
-	int	hi;
-	int	mid;
+	long	best;
+	int		i;
 
-	lo = paths->len;
-	hi = paths->len + num_ants;
+	best = INF;
+	i = 0;
+	while (i < num_paths && paths)
+	{
+		if (paths->len < best)
+			best = paths->len;
+		paths = paths->next;
+		i++;
+	}
+	return (best);
+}
+
+/* Fewest turns for num_ants over these routes, binary searched on capacity. */
+long	calc_turns(t_path *paths, int num_paths, int num_ants)
+{
+	long	lo;
+	long	hi;
+	long	mid;
+
+	lo = min_len(paths, num_paths);
+	hi = lo + num_ants;
 	while (lo < hi)
 	{
-		mid = (lo + hi) / 2;
+		mid = lo + (hi - lo) / 2;
 		if (capacity(paths, num_paths, mid) >= num_ants)
 			hi = mid;
 		else
@@ -58,50 +67,47 @@ int	calc_turns(t_path *paths, int num_paths, int num_ants)
 	return (lo);
 }
 
-static int	pick_min(int *cost, int k)
+/* Route i can hold turns - len + 1 ants; returns how many are in excess. */
+static long	fill_counts(t_path **arr, int k, long turns, int num_ants)
 {
-	int	best;
-	int	i;
+	long	total;
+	int		i;
 
-	best = 0;
-	i = 1;
+	total = 0;
+	i = 0;
 	while (i < k)
 	{
-		if (cost[i] < cost[best])
-			best = i;
+		arr[i]->ants_assigned = 0;
+		if (turns >= arr[i]->len)
+			arr[i]->ants_assigned = (int)(turns - arr[i]->len + 1);
+		total += arr[i]->ants_assigned;
 		i++;
 	}
-	return (best);
+	return (total - num_ants);
 }
 
-/*
-** Hands the ants to the chosen paths one by one: each ant joins the path that
-** would let it arrive earliest (shortest len + ants already queued). The
-** result is stored in every path's ants_assigned.
-*/
+/* Fills every route to the turn limit, then drops the surplus from the
+** longest ones, which is the same split a one-ant-at-a-time greedy gives. */
 void	assign_counts(t_lem_in *lem, t_path **arr, int k)
 {
-	int	*cost;
-	int	a;
-	int	best;
+	long	extra;
+	int		i;
 
-	cost = malloc(sizeof(int) * k);
-	if (!cost)
-		error_exit(lem);
-	a = 0;
-	while (a < k)
+	extra = fill_counts(arr, k, calc_turns(lem->paths, k, lem->num_ants),
+			lem->num_ants);
+	i = k - 1;
+	while (extra > 0 && i >= 0)
 	{
-		cost[a] = arr[a]->len;
-		arr[a]->ants_assigned = 0;
-		a++;
+		if (arr[i]->ants_assigned < extra)
+		{
+			extra -= arr[i]->ants_assigned;
+			arr[i]->ants_assigned = 0;
+		}
+		else
+		{
+			arr[i]->ants_assigned -= (int)extra;
+			extra = 0;
+		}
+		i--;
 	}
-	a = 0;
-	while (a < lem->num_ants)
-	{
-		best = pick_min(cost, k);
-		arr[best]->ants_assigned++;
-		cost[best]++;
-		a++;
-	}
-	free(cost);
 }

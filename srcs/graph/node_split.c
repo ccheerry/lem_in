@@ -12,12 +12,7 @@
 
 #include "lem_in.h"
 
-/*
-** Splits every room into in (id*2) and out (id*2+1) joined by an internal
-** edge of capacity 1, so at most one ant path can cross any single room.
-** start/end carry no useful flow on this edge: the flow source is out(start)
-** and the sink is in(end), so the limit never constrains them.
-*/
+/* Room id becomes in (id*2) -> out (id*2+1), capacity 1: one ant per room. */
 void	node_split(t_lem_in *lem)
 {
 	t_graph	*graph;

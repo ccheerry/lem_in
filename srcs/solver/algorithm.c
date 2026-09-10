@@ -6,49 +6,21 @@
 /*   By: ravazque <ravazque@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/15 20:58:42 by ravazque          #+#    #+#             */
-/*   Updated: 2026/06/15 21:01:20 by ravazque         ###   ########.fr       */
+/*   Updated: 2026/09/09 12:10:04 by ravazque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "lem_in.h"
 
-static int	bfs(t_graph *g, int src, int sink, t_bfs *b)
+static void	augment(t_flow *f)
 {
-	int		head;
-	int		tail;
 	t_edge	*e;
-
-	ft_memset(b->visited, 0, g->num_nodes);
-	head = 0;
-	tail = 0;
-	b->visited[src] = 1;
-	b->queue[tail++] = src;
-	while (head < tail)
-	{
-		e = g->adj[b->queue[head++]];
-		while (e)
-		{
-			if (e->cap > 0 && !b->visited[e->to])
-			{
-				b->visited[e->to] = 1;
-				b->parent[e->to] = e;
-				b->queue[tail++] = e->to;
-			}
-			e = e->next;
-		}
-	}
-	return (b->visited[sink]);
-}
-
-static void	augment(t_bfs *b, int src, int sink)
-{
 	int		node;
-	t_edge	*e;
 
-	node = sink;
-	while (node != src)
+	node = f->sink;
+	while (node != f->src)
 	{
-		e = b->parent[node];
+		e = f->parent[node];
 		e->cap -= 1;
 		e->rev->cap += 1;
 		node = e->rev->to;
@@ -56,29 +28,62 @@ static void	augment(t_bfs *b, int src, int sink)
 }
 
 /*
-** Edmonds-Karp on the split graph from out(start) to in(end). Each shortest
-** augmenting path adds one node-disjoint route; the returned flow is the
-** number of such routes (0 means start and end are not connected).
+** No set of flow routes can beat ceil(ants / flow) + lmin - 1 turns, so a
+** flow value that cannot reach the current best is never decomposed.
+*/
+static int	worth_trying(t_lem_in *lem, int flow, long best, long lmin)
+{
+	long	bound;
+
+	if (best < 0)
+		return (1);
+	bound = ((long)lem->num_ants + flow - 1) / flow + lmin - 1;
+	return (bound < best);
+}
+
+static void	keep_best(t_lem_in *lem, int flow, long *best)
+{
+	t_path	*paths;
+	long	turns;
+
+	paths = extract_paths(lem);
+	if (!paths)
+		return ;
+	turns = calc_turns(paths, flow, lem->num_ants);
+	if (*best >= 0 && turns >= *best)
+		return (free_paths(paths));
+	*best = turns;
+	free_paths(lem->paths);
+	lem->paths = paths;
+	lem->num_paths = flow;
+}
+
+/*
+** Min-cost max-flow from out(start) to in(end). Each pass adds one
+** room-disjoint route keeping the total length minimal; the flow value that
+** finishes in the fewest turns is the one left in lem->paths.
 */
 int	algorithm(t_lem_in *lem)
 {
-	t_bfs	b;
-	int		src;
-	int		sink;
+	t_flow	f;
 	int		flow;
+	long	best;
+	long	lmin;
 
-	src = lem->graph.start_id * 2 + 1;
-	sink = lem->graph.end_id * 2;
-	b.parent = malloc(sizeof(t_edge *) * lem->graph.num_nodes);
-	b.queue = malloc(sizeof(int) * lem->graph.num_nodes);
-	b.visited = malloc(lem->graph.num_nodes);
-	if (!b.parent || !b.queue || !b.visited)
-		return (free(b.parent), free(b.queue), free(b.visited), 0);
+	if (!alloc_flow(&lem->graph, &f))
+		return (0);
 	flow = 0;
-	while (bfs(&lem->graph, src, sink, &b))
+	best = -1;
+	lmin = 0;
+	while (best != lmin && shortest_path(&lem->graph, &f))
 	{
-		augment(&b, src, sink);
+		augment(&f);
 		flow++;
+		if (worth_trying(lem, flow, best, lmin))
+			keep_best(lem, flow, &best);
+		if (flow == 1 && lem->paths)
+			lmin = lem->paths->len;
 	}
-	return (free(b.parent), free(b.queue), free(b.visited), flow);
+	free_flow(&f);
+	return (lem->num_paths);
 }

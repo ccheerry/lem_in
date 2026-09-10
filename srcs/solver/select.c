@@ -6,17 +6,14 @@
 /*   By: ravazque <ravazque@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/15 20:58:38 by ravazque          #+#    #+#             */
-/*   Updated: 2026/06/15 20:59:33 by ravazque         ###   ########.fr       */
+/*   Updated: 2026/09/09 12:10:04 by ravazque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "lem_in.h"
 
-/*
-** Insertion sort of the path list by length, shortest first, so that taking
-** the first k paths always means "the k shortest".
-*/
-static t_path	*sort_paths(t_path *head)
+/* Insertion sort by length, shortest route first. */
+t_path	*sort_paths(t_path *head)
 {
 	t_path	*sorted;
 	t_path	*cur;
@@ -64,55 +61,17 @@ static t_path	**build_array(t_path *head, int *count)
 	return (arr);
 }
 
-/*
-** Tries every count of paths from 1 to the maximum flow and keeps the one
-** giving the fewest turns. More paths is not always better: a long extra
-** path can delay the last ant.
-*/
-static int	best_count(t_path *head, int count, int ants)
-{
-	int	k;
-	int	best_k;
-	int	best_t;
-	int	t;
-
-	best_k = 1;
-	best_t = -1;
-	k = 1;
-	while (k <= count)
-	{
-		t = calc_turns(head, k, ants);
-		if (best_t < 0 || t < best_t)
-		{
-			best_t = t;
-			best_k = k;
-		}
-		k++;
-	}
-	return (best_k);
-}
-
+/* Orders the winning routes shortest first and shares the ants out. */
 int	select_paths(t_lem_in *lem)
 {
 	t_path	**arr;
 	int		count;
-	int		best_k;
-	int		i;
 
-	lem->paths = sort_paths(extract_paths(lem));
+	lem->paths = sort_paths(lem->paths);
 	arr = build_array(lem->paths, &count);
 	if (!arr || count == 0)
-		error_exit(lem);
-	best_k = best_count(lem->paths, count, lem->num_ants);
-	assign_counts(lem, arr, best_k);
-	i = best_k;
-	while (i < count)
-	{
-		free(arr[i]->rooms);
-		free(arr[i]);
-		i++;
-	}
-	arr[best_k - 1]->next = NULL;
-	lem->num_paths = best_k;
-	return (free(arr), best_k);
+		return (free(arr), error_exit(lem), 0);
+	assign_counts(lem, arr, count);
+	lem->num_paths = count;
+	return (free(arr), count);
 }

@@ -6,52 +6,49 @@
 /*   By: ravazque <ravazque@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/15 20:58:40 by ravazque          #+#    #+#             */
-/*   Updated: 2026/06/15 20:59:33 by ravazque         ###   ########.fr       */
+/*   Updated: 2026/09/09 12:10:04 by ravazque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "lem_in.h"
 
-/*
-** A forward edge (is_rev == 0) whose capacity dropped to 0 carries one unit of
-** flow. Reverse edges keep is_rev == 1, so they are never mistaken for flow.
-*/
-static t_edge	*find_flow_edge(t_graph *g, int node)
+/* A saturated forward edge carries one unit of flow; the sink is shared. */
+static t_edge	*find_flow_edge(t_graph *g, int node, t_decomp *d)
 {
 	t_edge	*e;
 
 	e = g->adj[node];
 	while (e)
 	{
-		if (e->is_rev == 0 && e->cap == 0)
+		if (e->is_rev == 0 && e->cap == 0
+			&& (e->to == d->sink || !d->used[e->to]))
 			return (e);
 		e = e->next;
 	}
 	return (NULL);
 }
 
-/*
-** Walks one flow route from out(start) to in(end), storing every split-node
-** id and consuming each edge (cap back to 1) so the next call finds another
-** route. Returns the node count, or 0 when no route leaves the source.
-*/
-static int	walk_flow(t_graph *g, int src, int sink, int *nodes)
+/* Walks the route leaving src through d->cur, marking the rooms it takes. */
+static int	walk_flow(t_graph *g, t_decomp *d)
 {
 	t_edge	*e;
 	int		cur;
 	int		n;
 
-	cur = src;
 	n = 0;
-	nodes[n++] = cur;
-	while (cur != sink)
+	d->nodes[n++] = d->src;
+	cur = d->cur->to;
+	d->nodes[n++] = cur;
+	while (cur != d->sink)
 	{
-		e = find_flow_edge(g, cur);
+		if (d->used[cur])
+			return (0);
+		d->used[cur] = 1;
+		e = find_flow_edge(g, cur, d);
 		if (!e)
 			return (0);
-		e->cap = 1;
 		cur = e->to;
-		nodes[n++] = cur;
+		d->nodes[n++] = cur;
 	}
 	return (n);
 }
@@ -80,28 +77,50 @@ static t_path	*build_path(int *nodes, int n)
 	return (path);
 }
 
-t_path	*extract_paths(t_lem_in *lem)
+/* One route per saturated edge leaving src; the cursor never reuses one. */
+static t_path	*collect(t_lem_in *lem, t_decomp *d)
 {
 	t_path	*head;
 	t_path	*path;
-	int		*nodes;
-	int		sink;
 	int		n;
 
-	sink = lem->graph.end_id * 2;
-	nodes = malloc(sizeof(int) * lem->graph.num_nodes);
-	if (!nodes)
-		error_exit(lem);
 	head = NULL;
-	n = walk_flow(&lem->graph, lem->graph.start_id * 2 + 1, sink, nodes);
-	while (n > 0)
+	while (d->cur)
 	{
-		path = build_path(nodes, n);
-		if (!path)
-			return (free(nodes), error_exit(lem), NULL);
-		path->next = head;
-		head = path;
-		n = walk_flow(&lem->graph, lem->graph.start_id * 2 + 1, sink, nodes);
+		n = 0;
+		if (d->cur->is_rev == 0 && d->cur->cap == 0)
+			n = walk_flow(&lem->graph, d);
+		d->cur = d->cur->next;
+		if (n > 0)
+		{
+			path = build_path(d->nodes, n);
+			if (!path)
+				return (free_paths(head), NULL);
+			path->next = head;
+			head = path;
+		}
 	}
-	return (free(nodes), head);
+	return (head);
+}
+
+/* Splits the flow into routes without consuming it, so it can keep growing. */
+t_path	*extract_paths(t_lem_in *lem)
+{
+	t_decomp	d;
+	t_path		*head;
+
+	d.src = lem->graph.start_id * 2 + 1;
+	d.sink = lem->graph.end_id * 2;
+	d.cur = lem->graph.adj[d.src];
+	d.nodes = malloc(sizeof(int) * (lem->graph.num_nodes + 2));
+	d.used = ft_calloc(lem->graph.num_nodes, 1);
+	if (!d.nodes || !d.used)
+		return (free(d.nodes), free(d.used), error_exit(lem), NULL);
+	d.used[d.src] = 1;
+	head = collect(lem, &d);
+	free(d.nodes);
+	free(d.used);
+	if (!head)
+		error_exit(lem);
+	return (head);
 }

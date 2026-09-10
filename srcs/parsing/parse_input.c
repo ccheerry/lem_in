@@ -6,7 +6,7 @@
 /*   By: ravazque <ravazque@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/15 20:59:00 by ravazque          #+#    #+#             */
-/*   Updated: 2026/06/15 20:59:33 by ravazque         ###   ########.fr       */
+/*   Updated: 2026/09/10 12:37:34 by ravazque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,20 @@ static int	parse_ants(t_lem_in *lem, char *line)
 	return (1);
 }
 
+static char	*first_data_line(t_lem_in *lem, char *data, size_t len, size_t *pos)
+{
+	char	*line;
+
+	line = next_line(data, len, pos);
+	while (line && line[0] == '#')
+	{
+		if (!store_line(&lem->input, line))
+			return (NULL);
+		line = next_line(data, len, pos);
+	}
+	return (line);
+}
+
 static int	dispatch_line(t_lem_in *lem, char *line, int *type)
 {
 	if (ft_strcmp(line, "##start") == 0)
@@ -82,7 +96,7 @@ int	parse_input(t_lem_in *lem)
 	if (!data || len == 0)
 		return (free(data), 0);
 	pos = 0;
-	line = next_line(data, len, &pos);
+	line = first_data_line(lem, data, len, &pos);
 	if (!parse_ants(lem, line) || !store_line(&lem->input, line))
 		return (free(data), 0);
 	lem->hash = hash_new(HASH_SIZE);
