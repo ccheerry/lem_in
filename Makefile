@@ -1,6 +1,7 @@
 MAKEFLAGS	+= --no-print-directory
 
 NAME		= lem-in
+VISU		= visu
 
 CC			= cc
 CFLAGS		= -Wall -Wextra -Werror -O0
@@ -36,6 +37,11 @@ SRCS		= srcs/main.c \
 
 OBJS		= $(SRCS:%.c=$(OBJ_DIR)/%.o)
 
+VISU_SRCS	= srcs/bonus/visu.c \
+			  srcs/bonus/visu_write.c
+
+VISU_OBJS	= $(VISU_SRCS:%.c=$(OBJ_DIR)/%.o)
+
 LIBFT_SRC	= $(addprefix $(LIBFT_DIR)/, \
 				  ft_memset.c ft_bzero.c ft_strlen.c ft_atoi.c ft_isdigit.c \
 				  ft_isalpha.c ft_isprint.c ft_isascii.c ft_isalnum.c ft_memchr.c \
@@ -58,7 +64,13 @@ $(NAME): $(LIBFT) $(OBJS)
 	@$(CC) $(CFLAGS) $(OBJS) $(LIBFT) -o $(NAME)
 	@printf "$(CYAN)Ready!$(RESET)\n"
 
-$(OBJ_DIR)/%.o: %.c include/lem_in.h lib/libft.h
+bonus: $(NAME) $(VISU)
+
+$(VISU): $(LIBFT) $(VISU_OBJS)
+	@$(CC) $(CFLAGS) $(VISU_OBJS) $(LIBFT) -o $(VISU)
+	@printf "$(CYAN)Visualizer ready! ./lem-in < map | ./$(VISU)$(RESET)\n"
+
+$(OBJ_DIR)/%.o: %.c include/lem_in.h include/visu.h lib/libft.h
 	@mkdir -p $(dir $@)
 	@$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
@@ -69,7 +81,7 @@ clean:
 
 fclean: clean
 	@$(MAKE) -C $(LIBFT_DIR) fclean
-	@rm -f $(NAME)
+	@rm -f $(NAME) $(VISU)
 
 # clean:
 # 	@printf "$(RED)Cleaning...$(RESET)\n"
@@ -78,8 +90,8 @@ fclean: clean
 
 # fclean: clean
 # 	@$(MAKE) -C $(LIBFT_DIR) fclean > /dev/null 2>&1
-# 	@rm -f $(NAME)
+# 	@rm -f $(NAME) $(VISU)
 
 re: fclean all
 
-.PHONY: all clean fclean re
+.PHONY: all bonus clean fclean re

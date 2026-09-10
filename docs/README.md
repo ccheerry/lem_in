@@ -12,18 +12,22 @@ except the start and the end may hold more than one ant at a time.
 ## Layout
 
 ```
-.
-├── docs/       README.md                   # this document
-├── include/    lem_in.h                    # types, constants, prototypes
-├── lib/        libft                       # the only helper library used
-├── maps/       valid/ · invalid/           # test colonies
+lem-in/
+│
+├── visualizer.html                         # bonus: the visualizer page
+├── srcs/bonus/                             # bonus: ./lem-in < map | ./visu
+├── include/                                # types, constants, prototypes
+├── lib/               libft                # the only helper library used
+├── maps/              valid/ & invalid/    # test colonies
+│
 └── srcs/
-    ├── main.c                              # parse → build → solve → simulate
-    ├── parsing/     read, validate, store the colony
-    ├── graph/       adjacency lists, node splitting, room lookup
-    ├── solver/      min-cost max flow, route extraction, route and ant selection
-    ├── simulation/  turn-by-turn output
-    └── utils/       memory cleanup
+    ├── utils/         memory cleanup
+    ├── parsing/       read, validate, store the colony
+    ├── graph/         adjacency lists, node splitting, room lookup
+    ├── solver/        min-cost max flow, route extraction, route and ant selection
+    ├── simulation/    turn-by-turn output
+    │
+    └── main.c                              # parse → build → solve → simulate
 ```
 
 Build with `make`, run with `./lem-in < map`, clean with `make fclean`. The
@@ -108,6 +112,21 @@ the surplus from the longest ones.
 ant currently between the start and the end. Everything — the echoed map, the
 blank line, all the turns — goes through a 64 KB buffer flushed whenever it
 fills, so memory stays flat however long the simulation runs.
+
+## Visualizer
+
+Built with `make bonus` and used as the subject describes it,
+`./lem-in < map | ./visu`, which injects the simulation into `visualizer.html`
+and writes a self-contained `lem-in-visu.html`.
+
+The page draws one lane per route &mdash; start on the left, end on the right,
+a dot per room &mdash; and animates every ant turn by turn, which is what makes
+the flow legible: short routes saturate, long ones carry a single wave. Room
+coordinates are not used, since the generator puts every room on the `x == y`
+diagonal. Alongside it the page reports the colony, the solution, live
+progress, and re-checks the simulation on its own: one move per ant per turn,
+every move through a real tunnel, one ant per room, everyone home at the end.
+A `##visu speed=4 paused` line in the colony steers it.
 
 ## What gets rejected
 

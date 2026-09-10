@@ -5,8 +5,12 @@ objects/
 lib/libft.a
 lib/.bonus
 
-# Binary
+# Binaries
 lem-in
+visu
+
+# Generated visualizer page
+lem-in-visu.html
 
 # IDE / Editor
 .vscode/

@@ -208,61 +208,77 @@ meaning, any other `##…` line is ignored.
 ```
 lem-in/
 │
-├── README.md
-├── Makefile
-├── .gitignore
+├── README.md                             # Main project documentation
+├── Makefile                              # Build rules for lem-in and bonus visualizer
+├── .gitignore                            # Files and directories ignored by Git
 │
 ├── docs/
-│   └── README.md                   # Condensed project documentation
+│   └── README.md                         # Condensed project documentation
 │
 ├── include/
-│   └── lem_in.h                    # Types, constants and every prototype
+│   ├── lem_in.h                          # Core types, constants and prototypes
+│   └── visu.h                            # Visualizer types and function prototypes
 │
-├── lib/                            # libft — the only helper library used
-│   ├── Makefile
-│   ├── libft.h
-│   └── ft_*.c                      # strings, memory, lists, conversions
+├── lib/                                  # libft — the only helper library used
+│   ├── Makefile                          # Builds the libft static library
+│   ├── libft.h                           # libft declarations and shared types
+│   └── ft_*.c                            # Strings, memory, lists and conversions
 │
-├── maps/                           # Test colonies
-│   ├── valid/                      # Must produce a simulation
-│   │   ├── example.map             # 3 ants, two routes of different length
-│   │   ├── linear.map              # one corridor, the ants queue up
-│   │   ├── two_paths.map           # two routes of equal length, 4 ants
-│   │   ├── diff_len_paths.map      # the longer route is still worth using
-│   │   ├── single_ant.map          # smallest possible colony
-│   │   └── comments_commands.map   # comments and unknown commands ignored
-│   └── invalid/                    # Must print ERROR (18 cases)
-│       ├── empty.map               # no input at all
-│       ├── no_ants.map             # ants_zero / ants_negative / ants_not_number
-│       ├── room_missing_field.map  # room_extra_field, coords_not_int
-│       ├── room_name_starts_L.map  # room_name_starts_hash
-│       ├── dup_room.map            # dup_start, dup_end
-│       ├── no_start.map            # no_end
-│       ├── link_unknown_room.map   # self_link
-│       └── no_path.map             # valid colony, start and end disconnected
+├── maps/                                 # Test colonies
+│   ├── valid/                            # Must produce a simulation
+│   │   ├── example.map                   # 3 ants, two routes of different length
+│   │   ├── linear.map                    # One corridor, the ants queue up
+│   │   ├── two_paths.map                 # Two routes of equal length, 4 ants
+│   │   ├── diff_len_paths.map            # The longer route is still worth using
+│   │   ├── single_ant.map                # Smallest possible colony
+│   │   └── comments_commands.map         # Comments and unknown commands ignored
+│   │
+│   └── invalid/                          # Must print ERROR (18 cases)
+│       ├── empty.map                     # No input at all
+│       ├── no_ants.map                   # ants_zero / ants_negative / ants_not_number
+│       ├── room_missing_field.map        # room_extra_field / coords_not_int
+│       ├── room_name_starts_L.map        # room_name_starts_hash
+│       ├── dup_room.map                  # dup_start / dup_end
+│       ├── no_start.map                  # no_end
+│       ├── link_unknown_room.map         # self_link
+│       └── no_path.map                   # Valid colony, start and end disconnected
 │
-└── srcs/
-    ├── main.c                      # parse → build → solve → simulate → free
-    ├── parsing/
-    │   ├── read_stdin.c            # slurps stdin into one growable buffer
-    │   ├── parse_input.c           # line splitting, ant count, dispatch
-    │   ├── parse_rooms.c           # room validation and storage
-    │   ├── parse_links.c           # tunnel validation and storage
-    │   └── store_line.c            # keeps the input for the echo
-    ├── graph/
-    │   ├── graph_init.c            # adjacency lists + residual reverse edges
-    │   ├── node_split.c            # room → in/out pair with capacity 1
-    │   └── hash_table.c            # room lookup by name (djb2, chaining)
-    ├── solver/
-    │   ├── algorithm.c             # min-cost max flow
-    │   ├── paths.c                 # flow decomposition into room sequences
-    │   ├── select.c                # how many routes to keep
-    │   └── turns.c                 # turn count and ant distribution
-    ├── simulation/
-    │   ├── simulate.c              # one line per turn
-    │   └── output.c                # fixed-size flushing output buffer
-    └── utils/
-        └── memory.c                # free helpers
+├── srcs/
+│   ├── main.c                            # parse → build → solve → simulate → free
+│   │
+│   ├── bonus/
+│   │   ├── visu.c                        # Visualizer entry point and rendering logic
+│   │   └── visu_write.c                  # Visualizer output / HTML generation helpers
+│   │
+│   ├── graph/
+│   │   ├── graph_init.c                  # Adjacency lists + residual reverse edges
+│   │   ├── node_split.c                  # Room → in/out pair with capacity 1
+│   │   └── hash_table.c                  # Room lookup by name (djb2, chaining)
+│   │
+│   ├── parsing/
+│   │   ├── parse_input.c                 # Line splitting, ant count and dispatch
+│   │   ├── parse_links.c                 # Tunnel validation and storage
+│   │   ├── parse_rooms.c                 # Room validation and storage
+│   │   ├── read_stdin.c                  # Slurps stdin into one growable buffer
+│   │   └── store_line.c                  # Keeps the original input for the echo
+│   │
+│   ├── simulation/
+│   │   ├── output.c                      # Fixed-size flushing output buffer
+│   │   └── simulate.c                    # Moves ants and prints one line per turn
+│   │
+│   ├── solver/
+│   │   ├── algorithm.c                   # Main min-cost max-flow solver
+│   │   ├── flow.c                        # Flow augmentation and residual updates
+│   │   ├── paths.c                       # Flow decomposition into room sequences
+│   │   ├── select.c                      # Chooses how many routes to keep
+│   │   ├── shortest.c                    # Shortest augmenting-path computation
+│   │   └── turns.c                       # Turn count and ant distribution
+│   │
+│   └── utils/
+│       └── memory.c                      # Allocation cleanup and free helpers
+│
+├── lem-in-visu.html                      # Generated / alternative visualization page
+└── visualizer.html                       # Browser-based colony visualizer
 ```
 
 Every module talks through `t_lem_in`, declared in `include/lem_in.h`: it owns
@@ -336,6 +352,50 @@ turn t, route of length len, ant j (0-based on that route):
 Every route is filled up to the turn limit and the surplus dropped from the
 longest ones, each route gets a contiguous block of ids, and every turn goes
 through a 64 KB buffer flushed whenever it fills.
+
+<br>
+
+</details>
+
+<details>
+<summary><strong>🐜 Bonus </strong></summary>
+
+<br>
+
+Built with `make bonus` and used the way the subject describes it:
+
+```bash
+make bonus
+./lem-in < maps/valid/subject.map | ./visu   # writes lem-in-visu.html
+xdg-open lem-in-visu.html
+```
+
+`visu` reads the simulation on stdin and injects it into `visualizer.html`,
+writing a self-contained page. No install, no server, no dependency.
+
+The page shows the colony, the solution and nothing else:
+
+| | |
+|---|---|
+| view | one lane per route, start on the left, end on the right, a dot per room |
+| ants | one coloured dot per ant, gliding between the two turns it sits between |
+| colony | ants, rooms, tunnels, routes used |
+| solution | turns, and the count the generator asked for when the map carries one |
+| progress | how many ants wait at the start, are moving, or have arrived |
+| validity | five rules re-checked against the colony, naming the first offending turn |
+| controls | play/pause, step, scrub, speed, pan and zoom, `space` and arrow keys |
+
+The lanes are what makes the algorithm legible: the short routes fill up and
+stay saturated while the long ones carry a single wave of ants. Room
+coordinates are not used for the drawing because the generator puts every room
+on the `x == y` diagonal, which carries no shape.
+
+Commands and comments come out on stdout as well, so the colony can steer the
+page &mdash; put a line like this in the map:
+
+```
+##visu speed=4 paused
+```
 
 <br>
 
