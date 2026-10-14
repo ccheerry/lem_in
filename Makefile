@@ -66,6 +66,21 @@ $(VISU): $(VISU_SRC)
 		&& printf "$(CYAN)Visualizer ready! ./lem-in < map | ./$(VISU)$(RESET)\n" \
 		|| printf "$(RED)python3 cannot import tkinter: install Tk (python3-tk / tk)$(RESET)\n"
 
+install:
+	@command -v $(CC) >/dev/null || { printf "$(RED)$(CC) not found: install gcc or clang$(RESET)\n" >&2; exit 1; }
+	@python3 -c "import tkinter" >/dev/null 2>&1 \
+		|| printf "$(RED)bonus only: python3 with tkinter is needed by the visualizer (python3-tk / tk)$(RESET)\n"
+	@printf "$(CYAN)dependencies ready: make, or make bonus for the visualizer$(RESET)\n"
+
+# Valid and stress colonies must be solved, invalid ones must print ERROR on stderr.
+test: $(NAME)
+	@fail=0; \
+	for f in maps/valid/*.map maps/stress/*.map; do \
+		./$(NAME) < $$f > /dev/null 2>&1 || { printf "$(RED)FAIL$(RESET) %s\n" $$f; fail=1; }; done; \
+	for f in maps/invalid/*.map; do \
+		[ "$$(./$(NAME) < $$f 2>&1 > /dev/null)" = "ERROR" ] || { printf "$(RED)FAIL$(RESET) %s\n" $$f; fail=1; }; done; \
+	[ $$fail = 0 ] && printf "$(CYAN)every map behaves as expected$(RESET)\n"
+
 maps:
 	@python3 maps/stress/generate.py
 
@@ -85,4 +100,14 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: all bonus maps clean fclean re
+help:
+	@echo "make          build lib/libft.a, then ./lem-in"
+	@echo "make install  check the compiler, and python3 with tkinter for the visualizer"
+	@echo "make bonus    also link ./visu-hex to the visualizer"
+	@echo "make test     run every map of maps/ and check the result of each one"
+	@echo "make maps     write the large stress colonies to maps/stress/generated/"
+	@echo "make clean    remove the objects"
+	@echo "make fclean   remove the objects, libft.a, the binary and the visualizer link"
+	@echo "make re       fclean, then build"
+
+.PHONY: all help install bonus test maps clean fclean re

@@ -1,5 +1,5 @@
 """Replays the moves: where every ant is on any turn, the routes the ants
-followed, and whether the simulation respects the rules of the subject."""
+followed, and whether the simulation respects the rules of the colony."""
 
 from array import array
 
@@ -98,7 +98,7 @@ class Replay:
             counts[1] += delta
 
     def _check_turn(self, t, moves, pos, occupant):
-        """The subject's rules, checked before the turn applies: one move per
+        """The colony's rules, checked before the turn applies: one move per
         ant, through a tunnel, into a free or vacated room, never out of E."""
         colony = self.colony
         movers = set(moves[0::2])

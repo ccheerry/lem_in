@@ -1,6 +1,4 @@
-"""visu-hex: animates a lem-in run in a tkinter window.
-
-Usage: ./lem-in < map | ./visu-hex [options]"""
+"""visu-hex: animates a lem-in run in a tkinter window (./lem-in < map | ./visu-hex)."""
 
 import argparse
 import sys
