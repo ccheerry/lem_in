@@ -20,7 +20,22 @@ are no external dependencies. Input is read from stdin in one pass, and the
 simulation is streamed to stdout through a fixed-size buffer. The bonus is a
 **visualizer written in Python with tkinter** — Python's own GUI toolkit, so
 there is nothing to pip-install — that replays the simulation in a window and
-re-checks it against the rules of the subject.
+re-checks it against the rules of the colony.
+
+<details>
+<summary><strong>🖼️ Screenshots</strong></summary>
+
+<br>
+
+<p align="center">
+  <img src="docs/img/visu_map.gif" alt="visu-hex replaying hundred_ants.map: 124 ants on 12 room-disjoint routes" width="820">
+</p>
+
+<p align="center"><sub><code>./lem-in &lt; maps/valid/hundred_ants.map | ./visu-hex</code>: 124 ants, 523 rooms, 12 room-disjoint routes, 30 turns.</sub></p>
+
+<br>
+
+</details>
 
 ## 🎯 Objectives
 
@@ -79,9 +94,10 @@ re-checks it against the rules of the subject.
 ### Build and run
 
 ```bash
-make                                    # builds libft, then the lem-in binary
+make install                        # checks the compiler, and Tk for the visualizer
+make                                # builds libft, then the lem-in binary
 ./lem-in < maps/valid/example.map
-make fclean                             # removes objects, libft.a and the binary
+make fclean                         # removes objects, libft.a and the binary
 ```
 
 ### A solved colony
@@ -141,10 +157,10 @@ between them — prints `ERROR` and exits with status 1.
 ### Full sweep
 
 ```bash
-for f in maps/valid/*.map maps/stress/*.map; do ./lem-in < "$f" > /dev/null || echo "FAIL $f"; done
-for f in maps/invalid/*.map; do ./lem-in < "$f" 2>&1 | head -1; done   # 21x ERROR
-valgrind --leak-check=full --show-leak-kinds=all ./lem-in < maps/valid/example.map
-make maps                               # writes the large colonies to maps/stress/generated/
+make test                                                          # every valid and stress colony solved, the 21 invalid ones print ERROR
+valgrind --leak-check=full --show-leak-kinds=all \
+    ./lem-in < maps/valid/example.map
+make maps                                                          # writes the large colonies to maps/stress/generated/
 time ./lem-in < maps/stress/generated/dense_4000.map > /dev/null
 ```
 
@@ -173,21 +189,23 @@ Nothing else has to be installed: `lib/` ships the only helper library used.
 ### Make targets
 
 ```bash
-make            # build lib/libft.a and the lem-in binary
-make bonus      # build lem-in and link ./visu-hex to the Python visualizer
-make maps       # generate the large stress colonies (not versioned)
-make clean      # remove the objects/ directory
-make fclean     # clean + remove libft.a, the binary and the visualizer link
-make re         # fclean + build
+make install   # check the compiler, and python3 with tkinter for the bonus
+make           # build lib/libft.a and the lem-in binary
+make bonus     # build lem-in and link ./visu-hex to the Python visualizer
+make test      # run every colony of maps/ and check each result
+make maps      # generate the large stress colonies (not versioned)
+make clean     # remove the objects/ directory
+make fclean    # clean + remove libft.a, the binary and the visualizer link
+make re        # fclean + build
 ```
 
 ### Running
 
 ```bash
-./lem-in < maps/valid/two_paths.map     # from a file
-cat colony.map | ./lem-in               # from a pipe
-./lem-in                                # typed by hand, end with Ctrl-D
-./lem-in < maps/valid/subject.map | ./visu-hex   # bonus: watch the ants walk
+./lem-in < maps/valid/two_paths.map               # from a file
+cat colony.map | ./lem-in                         # from a pipe
+./lem-in                                          # typed by hand, end with Ctrl-D
+./lem-in < maps/valid/corridor.map | ./visu-hex   # bonus: watch the ants walk
 ```
 
 The program takes **no arguments**: it reads the colony on standard input,
@@ -196,14 +214,14 @@ writes the simulation on standard output and `ERROR` on standard error.
 ### Map format
 
 ```
-4                 # number of ants, positive integer, first line
-##start           # the next room is the entry
-0 0 3             # name x y
+4       # number of ants, positive integer, first line
+##start  # the next room is the entry
+0 0 3   # name x y
 2 2 5
 3 4 0
-##end             # the next room is the exit
+##end  # the next room is the exit
 1 8 3
-0-2               # tunnel between two declared rooms
+0-2     # tunnel between two declared rooms
 2-3
 3-1
 ```
@@ -226,97 +244,101 @@ meaning, any other `##…` line is ignored (the visualizer reads `##visu`).
 ```
 lem-in/
 │
-├── README.md                             # Main project documentation
-├── Makefile                              # Build rules: lem-in, bonus link, stress maps
-├── .gitignore                            # Files and directories ignored by Git
+├── README.md                         # Main project documentation
+├── Makefile                          # Build rules: lem-in, bonus link, stress maps
+├── .gitignore                        # Files and directories ignored by Git
 │
 ├── docs/
-│   └── README.md                         # Condensed project documentation
+│   ├── README.md                     # Condensed project documentation
+│   └── img/
+│       ├── visu_map.gif              # visu-hex replaying hundred_ants.map, map view
+│       ├── visu_lanes.png            # The same run, lanes view
+│       └── visu_big_map.png          # big_superposition.map with the computed layout
 │
 ├── include/
-│   └── lem_in.h                          # Core types, constants and prototypes
+│   └── lem_in.h                      # Core types, constants and prototypes
 │
-├── lib/                                  # libft — the only helper library used
-│   ├── Makefile                          # Builds the libft static library
-│   ├── libft.h                           # libft declarations and shared types
-│   └── ft_*.c                            # Strings, memory, lists and conversions
+├── lib/                              # libft — the only helper library used
+│   ├── Makefile                      # Builds the libft static library
+│   ├── libft.h                       # libft declarations and shared types
+│   └── ft_*.c                        # Strings, memory, lists and conversions
 │
-├── maps/                                 # Test colonies
-│   ├── valid/                            # Must produce a simulation
-│   │   ├── example.map                   # 3 ants, two routes of different length
-│   │   ├── linear.map                    # One corridor, the ants queue up
-│   │   ├── two_paths.map                 # Two routes of equal length, 4 ants
-│   │   ├── diff_len_paths.map            # The longer route is still worth using
-│   │   ├── extra_path.map                # A route that is not worth using
-│   │   ├── single_ant.map                # Smallest possible colony
-│   │   ├── subject.map                   # Example 1 of the subject
-│   │   ├── negative_coords.map           # Coordinates below zero are integers too
-│   │   ├── hundred_ants.map              # Generator --flow-thousand: 124 ants, 523 rooms
-│   │   └── comments_commands.map         # Comments and unknown commands ignored
+├── maps/                             # Test colonies
+│   ├── valid/                        # Must produce a simulation
+│   │   ├── example.map               # 3 ants, two routes of different length
+│   │   ├── linear.map                # One corridor, the ants queue up
+│   │   ├── two_paths.map             # Two routes of equal length, 4 ants
+│   │   ├── diff_len_paths.map        # The longer route is still worth using
+│   │   ├── extra_path.map            # A route that is not worth using
+│   │   ├── single_ant.map            # Smallest possible colony
+│   │   ├── corridor.map              # Three ants on a straight four-room corridor
+│   │   ├── negative_coords.map       # Coordinates below zero are integers too
+│   │   ├── hundred_ants.map          # Generator --flow-thousand: 124 ants, 523 rooms
+│   │   └── comments_commands.map     # Comments and unknown commands ignored
 │   │
-│   ├── invalid/                          # Must print ERROR (21 cases)
-│   │   ├── empty.map                     # No input at all
-│   │   ├── no_ants.map                   # ants_zero / ants_negative / ants_not_number
-│   │   ├── overflow_ants.map             # 2^64 + 5 ants — must not wrap to 5
-│   │   ├── room_missing_field.map        # room_extra_field / coords_not_int / overflow_coords
-│   │   ├── room_name_starts_L.map        # room_name_starts_hash
-│   │   ├── dup_room.map                  # dup_start / dup_end
-│   │   ├── no_start.map                  # no_end
-│   │   ├── link_unknown_room.map         # self_link
-│   │   ├── blank_line_middle.map         # An empty line stops the reading
-│   │   └── no_path.map                   # Valid colony, start and end disconnected
+│   ├── invalid/                      # Must print ERROR (21 cases)
+│   │   ├── empty.map                 # No input at all
+│   │   ├── no_ants.map               # ants_zero / ants_negative / ants_not_number
+│   │   ├── overflow_ants.map         # 2^64 + 5 ants — must not wrap to 5
+│   │   ├── room_missing_field.map    # room_extra_field / coords_not_int / overflow_coords
+│   │   ├── room_name_starts_L.map    # room_name_starts_hash
+│   │   ├── dup_room.map              # dup_start / dup_end
+│   │   ├── no_start.map              # no_end
+│   │   ├── link_unknown_room.map     # self_link
+│   │   ├── blank_line_middle.map     # An empty line stops the reading
+│   │   └── no_path.map               # Valid colony, start and end disconnected
 │   │
-│   └── stress/                           # Edge cases and scale
-│       ├── direct_link.map               # ##start joined to ##end by a tunnel
-│       ├── duplicate_tunnels.map         # The same tunnel declared several times
-│       ├── same_coords.map               # Every room on the same point
-│       ├── unicode_names.map             # UTF-8 room names
-│       ├── long_names.map                # 5000-character room names
-│       ├── commands_everywhere.map       # Comments, unknown commands and ##visu
-│       ├── million_ants.map              # 10^6 ants on the subject's corridor
-│       ├── big_superposition.map         # Generator --big-superposition: 2 893 rooms
-│       └── generate.py                   # `make maps`: 100k-room chain, 5000 routes, grids…
+│   └── stress/                       # Edge cases and scale
+│       ├── direct_link.map           # ##start joined to ##end by a tunnel
+│       ├── duplicate_tunnels.map     # The same tunnel declared several times
+│       ├── same_coords.map           # Every room on the same point
+│       ├── unicode_names.map         # UTF-8 room names
+│       ├── long_names.map            # 5000-character room names
+│       ├── commands_everywhere.map   # Comments, unknown commands and ##visu
+│       ├── million_ants.map          # 10^6 ants on the corridor of corridor.map
+│       ├── big_superposition.map     # Generator --big-superposition: 2 893 rooms
+│       └── generate.py               # `make maps`: 100k-room chain, 5000 routes, grids…
 │
 ├── bonus/
-│   ├── visu-hex                          # Launcher: ./lem-in < map | ./visu-hex
-│   └── visu_hex/                         # Python package (tkinter, no pip dependency)
-│       ├── __main__.py                   # Options, --dump mode
-│       ├── colony.py                     # Parses the echoed map and the moves
-│       ├── replay.py                     # Positions per turn, routes, validation
-│       ├── layout.py                     # Map scaling, zoom, pan, auto layout; lanes per route
-│       ├── view.py                       # Frame geometry, toolkit independent
-│       ├── player.py                     # Turn, phase and speed of the playback
-│       └── ui_tk.py                      # Canvas drawing, mouse, keys, frame loop
+│   ├── visu-hex                      # Launcher: ./lem-in < map | ./visu-hex
+│   └── visu_hex/                     # Python package (tkinter, no pip dependency)
+│       ├── __main__.py               # Options, --dump mode
+│       ├── colony.py                 # Parses the echoed map and the moves
+│       ├── replay.py                 # Positions per turn, routes, validation
+│       ├── layout.py                 # Map scaling, zoom, pan, auto layout; lanes per route
+│       ├── view.py                   # Frame geometry, toolkit independent
+│       ├── player.py                 # Turn, phase and speed of the playback
+│       └── ui_tk.py                  # Canvas drawing, mouse, keys, frame loop
 │
 └── srcs/
-    ├── main.c                            # parse → build → solve → simulate → free
+    ├── main.c                        # parse → build → solve → simulate → free
     │
     ├── graph/
-    │   ├── graph_init.c                  # Adjacency lists + residual reverse edges
-    │   ├── node_split.c                  # Room → in/out pair with capacity 1
-    │   └── hash_table.c                  # Room lookup by name (djb2, chaining)
+    │   ├── graph_init.c              # Adjacency lists + residual reverse edges
+    │   ├── node_split.c              # Room → in/out pair with capacity 1
+    │   └── hash_table.c              # Room lookup by name (djb2, chaining)
     │
     ├── parsing/
-    │   ├── parse_input.c                 # Line splitting, ant count and dispatch
-    │   ├── parse_links.c                 # Tunnel validation and storage
-    │   ├── parse_rooms.c                 # Room validation and storage
-    │   ├── read_stdin.c                  # Slurps stdin into one growable buffer
-    │   └── store_line.c                  # Keeps the original input for the echo
+    │   ├── parse_input.c             # Line splitting, ant count and dispatch
+    │   ├── parse_links.c             # Tunnel validation and storage
+    │   ├── parse_rooms.c             # Room validation and storage
+    │   ├── read_stdin.c              # Slurps stdin into one growable buffer
+    │   └── store_line.c              # Keeps the original input for the echo
     │
     ├── simulation/
-    │   ├── output.c                      # Fixed-size flushing output buffer
-    │   └── simulate.c                    # Moves ants and prints one line per turn
+    │   ├── output.c                  # Fixed-size flushing output buffer
+    │   └── simulate.c                # Moves ants and prints one line per turn
     │
     ├── solver/
-    │   ├── algorithm.c                   # Main min-cost max-flow solver
-    │   ├── flow.c                        # Scratch state of the search
-    │   ├── paths.c                       # Flow decomposition into room sequences
-    │   ├── select.c                      # Orders the routes and shares the ants out
-    │   ├── shortest.c                    # Cheapest augmenting path, bucket queue
-    │   └── turns.c                       # Turn count and ant distribution
+    │   ├── algorithm.c               # Main min-cost max-flow solver
+    │   ├── flow.c                    # Scratch state of the search
+    │   ├── paths.c                   # Flow decomposition into room sequences
+    │   ├── select.c                  # Orders the routes and shares the ants out
+    │   ├── shortest.c                # Cheapest augmenting path, bucket queue
+    │   └── turns.c                   # Turn count and ant distribution
     │
     └── utils/
-        └── memory.c                      # Allocation cleanup and free helpers
+        └── memory.c                  # Allocation cleanup and free helpers
 ```
 
 Every module talks through `t_lem_in`, declared in `include/lem_in.h`: it owns
@@ -412,10 +434,10 @@ through a 64 KB buffer flushed whenever it fills.
 
 <br>
 
-Built with `make bonus` and used the way the subject describes it:
+Built with `make bonus` and fed through a pipe:
 
 ```bash
-make bonus                                        # links ./visu-hex → bonus/visu-hex
+make bonus                                                        # links ./visu-hex → bonus/visu-hex
 ./lem-in < maps/valid/example.map | ./visu-hex
 ./lem-in < big.map | ./visu-hex --view lanes --speed 6 --paused
 ./visu-hex --help
@@ -424,7 +446,7 @@ make bonus                                        # links ./visu-hex → bonus/v
 `visu-hex` is a Python 3 program built on `tkinter`, the GUI toolkit that ships
 with Python itself, so there is nothing to install with pip. It opens a
 resizable window, reads the simulation on stdin, re-checks every move against
-the rules of the subject and animates the ants turn by turn.
+the rules of the colony and animates the ants turn by turn.
 
 ### Two views, `v` switches
 
@@ -436,6 +458,12 @@ shape — the generator puts every room on the `x == y` diagonal — the rooms a
 laid out from the graph instead: one column per distance from `##start`, rows
 ordered so that tunnels stay short, which turns a 4000-room colony into a
 readable flow from `S` to `E`.
+
+<p align="center">
+  <img src="docs/img/visu_big_map.png" alt="visu-hex map view of big_superposition.map">
+</p>
+
+<p align="center"><sub><code>maps/stress/big_superposition.map</code>: 2 893 rooms on the generator's diagonal, laid out from the graph; 164 ants in 70 turns, the number the generator asks for.</sub></p>
 
 **lanes** — one lane per route the ants actually took, shortest first, a dot
 per room, which is what makes the algorithm legible: the short routes stay
@@ -453,6 +481,12 @@ lem-in visu-hex   [lanes]                                  turn 34 / 69   playin
 
 ants 390  rooms 2556  tunnels 3122  routes 9  turns 69   start 89  moving 220  arrived 81   valid
 ```
+
+<p align="center">
+  <img src="docs/img/visu_lanes.png" alt="visu-hex lanes view of hundred_ants.map">
+</p>
+
+<p align="center"><sub>The lanes of <code>maps/valid/hundred_ants.map</code> at turn 18: every route is filled so that its last ant arrives by turn 30 (<code>len + ants - 1 ≤ 30</code>), from 14 ants on the route of length 17 down to 6 on the one of length 24.</sub></p>
 
 The bars around the view carry the rest:
 
